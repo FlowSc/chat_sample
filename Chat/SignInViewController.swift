@@ -21,10 +21,7 @@ class SignInViewController: UIViewController {
         setUI()
         setDelegates()
         setAttributes()
-        
-        FireStoreManager.shared.getChatList("CIedSiSeW8b9kn0E6TJn") { (str) in
-            print(str)
-        }
+ 
     }
     
     private func setUI() {

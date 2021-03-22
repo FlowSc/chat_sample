@@ -14,6 +14,8 @@ class NewChatViewController: UIViewController {
     private let searchView = SearchHeaderView()
     
     var connectedUsers: [User] = []
+    
+    var myId: String = ""
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,24 +29,10 @@ class NewChatViewController: UIViewController {
         
         self.navigationController?.navigationBar.isTranslucent = false
         
-        getDummy()
+        
     }
     
-    func getDummy() {
-        
-        
-        for i in 0...10 {
-            
-            let user = User(id: "\(i)", profileImgUrl: "", name: "seongchan\(i)", desc: "developer")
-
-            
-            connectedUsers.append(user)
-            
-        }
-        
-        print(connectedUsers.count)
-        
-        self.tableView.reloadData()
+    func setData(_ myId: String) {
         
     }
     
@@ -60,11 +48,10 @@ class NewChatViewController: UIViewController {
 extension NewChatViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        
         return searchView
     }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        
         return connectedUsers.count
     }
     
@@ -84,6 +71,10 @@ extension NewChatViewController: UITableViewDelegate, UITableViewDataSource {
         
         print(item)
         
+        FireStoreManager.shared.makeChat(myId, receiverId: item.id!) { str in
+            print(str, "ID")
+        }
+        
     }
     
     
@@ -93,7 +84,7 @@ extension NewChatViewController: SearchHeaderViewDelegate {
     func findKeywordChanged(_ text: String) {
         print(text)
         
-        FireStoreManager.shared.findUser(text) { (res) in
+        FireStoreManager.shared.findUser(text, myId: myId) { (res) in
             print(res.count)
             self.connectedUsers = res
             self.tableView.reloadData()
@@ -110,7 +101,7 @@ protocol SearchHeaderViewDelegate: class {
 class SearchHeaderView: UIView {
     
     private let titleLb = UILabel()
-    private let textField = UITextField()
+    private let textField = DebounceTextField()
     private let bottomLine = UIView()
     private let connectedLb = UILabel()
     
@@ -158,14 +149,14 @@ class SearchHeaderView: UIView {
         textField.delegate = self
         textField.autocorrectionType = .no
         textField.autocapitalizationType = .none
-        textField.addTarget(self, action: #selector(keywordChanged(_:)), for: .allEditingEvents)
+        
+        textField.debounce(delay: 0.5) { [weak self] (text) in
+            guard let self = self, let text = text else { return }
+            self.delegate?.findKeywordChanged(text)
+        }
+        
         
         self.backgroundColor = .white
-    }
-    
-    @objc func keywordChanged(_ sender: UITextField) {
-        guard let text = sender.text else { return }
-        delegate?.findKeywordChanged(text)
     }
     
     required init?(coder: NSCoder) {
@@ -253,12 +244,41 @@ final class NewChatTableViewCell: UITableViewCell {
     }
     
     func setData(_ user: User) {
-        self.imv.setImageFrom(user.profileImgUrl)
-        self.nameLb.text = user.name
-        self.descLb.text = user.desc
+        self.imv.setImageFrom(user.imageUrl)
+        self.nameLb.text = user.nickname
+        self.descLb.text = user.description
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+}
+
+class DebounceTextField: UITextField {
+
+    deinit {
+        self.removeTarget(self, action: #selector(self.editingChanged), for: .editingChanged)
+    }
+
+    private var workItem: DispatchWorkItem?
+    private var delay: Double = 0
+    private var callback: ((String?) -> Void)? = nil
+
+    func debounce(delay: Double, callback: @escaping ((String?) -> Void)) {
+        self.delay = delay
+        self.callback = callback
+        DispatchQueue.main.async {
+            self.callback?(self.text)
+        }
+        self.addTarget(self, action: #selector(self.editingChanged), for: .editingChanged)
+    }
+
+    @objc private func editingChanged(_ sender: UITextField) {
+      self.workItem?.cancel()
+      let workItem = DispatchWorkItem(block: { [weak self] in
+          self?.callback?(sender.text)
+      })
+      self.workItem = workItem
+      DispatchQueue.main.asyncAfter(deadline: .now() + self.delay, execute: workItem)
     }
 }

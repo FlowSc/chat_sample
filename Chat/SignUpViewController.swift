@@ -123,7 +123,9 @@ class SignUpViewController: UIViewController {
         
         guard let id = validEmail, let pw = validPassword, let nickname = validNickname else { return }
         
-        let newUser = User(id: "", email: id, pw: pw, profileImgUrl: "", name: nickname, desc: "", chat: nil)
+       
+        
+        let newUser = User(email: id, password: pw, imageUrl: "", nickname: nickname, description: "", id: "")
         
         FireStoreManager.shared.addUser(user: newUser) { (isSuccess) in
             if isSuccess {

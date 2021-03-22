@@ -11,6 +11,7 @@ target 'Chat' do
     pod 'Firebase'
     pod 'Firebase/Auth'
     pod 'Firebase/Firestore' 
+    pod 'FirebaseFirestoreSwift'
 
 
   target 'ChatTests' do

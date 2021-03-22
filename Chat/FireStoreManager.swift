@@ -7,8 +7,11 @@
 
 import Foundation
 import FirebaseFirestore
+import FirebaseFirestoreSwift
 
 typealias FetchResult = (id: String, data: [String: Any])
+typealias ChatResult = (chatId: String, other: String)
+typealias ChatThumbnailData = (chatId: String, userName: String, desc: String, content: String, lastDate: String)
 
 class FireStoreManager {
     
@@ -35,26 +38,22 @@ class FireStoreManager {
         
     }
     
-    func findUser(_ name: String, completion: @escaping ([User]) -> ()) {
+    func findUser(_ name: String, myId: String, completion: @escaping ([User]) -> ()) {
         
-        db.collection("users").whereField("nickname", isGreaterThanOrEqualTo: name)
+        db.collection("users")
+            .whereField("nickname", isGreaterThanOrEqualTo: name)
             .whereField("nickname", isLessThan: name + "z")
             .getDocuments { (snapshot, err) in
                 
                 guard let snapshot = snapshot else { return }
+                let user = try! snapshot.documents.map { doc -> User? in
+                    var user = try doc.data(as: User.self)
+                    user?.id = doc.documentID
+                    return user
+                }.compactMap { $0 }.filter { $0.id != myId}
                 
-                let users = snapshot.documents.map { document -> User? in
-                    let data = document.data()
-                    guard let email = data["email"] as? String,
-                          let pw = data["password"] as? String,
-                          let name = data["nickname"] as? String else { return nil }
-                    
-                    return User(id: document.documentID, email: email, pw: pw, profileImgUrl: "", name: name, desc: "", chat: nil)
-                    
-                }.compactMap { $0 }
-                
-                completion(users)
-                
+                completion(user)
+            
             }
         
     }
@@ -63,44 +62,70 @@ class FireStoreManager {
         
         let userCollection = db.collection("users")
         
-        userCollection.whereField("email", isEqualTo: user.email).getDocuments { (query, err) in
-            
-            if let query = query {
+        userCollection.whereField("email", isEqualTo: user.email)
+            .getDocuments { (query, err) in
                 
-                if query.count == 0 {
-                    userCollection.addDocument(data: [
-                        "email":user.email,
-                        "password":user.pw,
-                        "nickname":user.name,
-                        "imageUrl":user.profileImgUrl,
-                        "description":user.desc
-                    ]) { (err) in
-                        if let _ = err {
-                            completion(false)
-                        } else {
-                            completion(true)
+                if let query = query {
+                    
+                    if query.count == 0 {
+                        userCollection.addDocument(data: [
+                            "email":user.email,
+                            "password":user.password,
+                            "nickname":user.nickname,
+                            "imageUrl":user.imageUrl,
+                            "description":user.description
+                        ]) { (err) in
+                            if let _ = err {
+                                completion(false)
+                            } else {
+                                completion(true)
+                            }
                         }
+                    } else {
+                        completion(false)
                     }
+                    
                 } else {
                     completion(false)
                 }
-                
-            } else {
-                completion(false)
             }
-        }
     }
     
-    func getChatList(_ id: String, completion: @escaping (([String]) -> ())) {
-        
-        db.collection("chats").whereField("owners", arrayContains: id).getDocuments { (snapshot, err) in
-            if let list = snapshot?.documents.map({ $0.documentID }) {
-                completion(list)
+    func getChatList(_ userId: String, completion: @escaping (([ChatResult]) -> ())) {
+                
+        db.collection("chats").whereField("owners", arrayContains: userId).getDocuments { (snapshot, err) in
+                        
+            if let chatList = snapshot?.documents.map({ doc -> ChatResult in
+                
+                let id = doc.documentID
+                let owners = doc.data()["owners"] as! [String]
+                
+                if let others = owners.filter({ $0 != userId }).first {
+                    
+                    self.db.collection("users").document(others).getDocument { (userSnapshop, err) in
+                        
+
+                        
+
+                        var user = try? userSnapshop?.data(as: User.self)
+
+                        user?.id = id
+                        
+                        print(user, "DD")
+                    }
+                    
+                    return ChatResult(id, others)
+                } else {
+                    return ChatResult(id, "")
+                }
+            }) {
+                completion(chatList)
             } else {
                 completion([])
             }
         }
     }
+    
     
     func getLastChat(_ chatId: String, userId: String, completion: @escaping (Message?) -> ()) {
         
@@ -125,8 +150,30 @@ class FireStoreManager {
         }
     }
     
-    func makeChat(_ myId: String, receiverId: String, completion: @escaping (Chat)->()) {
+    func makeChat(_ myId: String, receiverId: String, completion: @escaping (String)->()) {
         
+        print([myId, receiverId].sorted(), "ID?")
+        
+        db.collection("chats").whereField("owners", isEqualTo: [myId, receiverId].sorted())
+            .getDocuments { (docs, err) in
+                if let _docs = docs {
+                    
+                    print(_docs.count, "COUNT")
+                    
+                    if _docs.count == 0 {
+                        let newChatId = self.db.collection("chats").addDocument(data: ["owners": [myId, receiverId].sorted()
+                        ]) { err in
+                            
+                        }.documentID
+                        
+                        completion(newChatId)
+                    } else {
+                        if let existed = _docs.documents.map({ $0.documentID }).first {
+                            completion(existed)
+                        }
+                    }
+                }
+            }
     }
     
     

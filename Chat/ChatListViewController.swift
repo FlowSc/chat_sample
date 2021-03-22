@@ -19,6 +19,8 @@ class ChatListViewController: UIViewController {
         
         let newChatVc = NewChatViewController()
         
+        newChatVc.myId = userDetail!.id
+        
         self.navigationController?.pushViewController(newChatVc, animated: true)
         
         
@@ -29,30 +31,35 @@ class ChatListViewController: UIViewController {
         self.userDetail = result
         
         FireStoreManager.shared.getChatList(result.id) { (list) in
-            list.forEach { (id) in
-                FireStoreManager.shared.getLastChat(id, userId: result.id) { (msg) in
-                    print(msg, "MSGS")
-                }
+            
+            print(list)
+            print(list.count)
+            
+            list.forEach { (chat) in
+                
+                FireStoreManager.shared.findUser(<#T##name: String##String#>, myId: <#T##String#>, completion: <#T##([User]) -> ()#>)
+                
             }
+            
         }
         
-        if let chats = result.data["chats"] as? [[String: Any]] {
-            
-            let thumbnails: [ChatThumbnail] = chats.map {
-                
-                guard let id = $0["id"] as? String,
-                      let sender = $0["sender"] as? String,
-                      let senderImg = $0["senderImg"] as? String,
-                      let thumb = $0["thumb"] as? String,
-                      let unreadCount = $0["unreadCount"] as? Int else { return nil }
-                
-                return ChatThumbnail(id: id, lastDate: "", unreadCount: "\(unreadCount)", sender: sender, senderImg: senderImg, lastMsg: thumb)
-            }.compactMap{ $0 }
-            
-            self.chatList = thumbnails
-            
-            self.tableView.reloadData()
-        }
+//        if let chats = result.data["chats"] as? [[String: Any]] {
+//
+//            let thumbnails: [ChatThumbnail] = chats.map {
+//
+//                guard let id = $0["id"] as? String,
+//                      let sender = $0["sender"] as? String,
+//                      let senderImg = $0["senderImg"] as? String,
+//                      let thumb = $0["thumb"] as? String,
+//                      let unreadCount = $0["unreadCount"] as? Int else { return nil }
+//
+//                return ChatThumbnail(id: id, lastDate: "", unreadCount: "\(unreadCount)", sender: sender, senderImg: senderImg, lastMsg: thumb)
+//            }.compactMap{ $0 }
+//
+//            self.chatList = thumbnails
+//
+//            self.tableView.reloadData()
+//        }
         
     }
     
@@ -117,11 +124,11 @@ extension ChatListViewController: UITableViewDelegate, UITableViewDataSource {
         
         
         
-
+        
         FireStoreManager.shared.getChat(item.id) { (message) in
             print(message)
             
-                    let vc = ChatViewController()
+            let vc = ChatViewController()
             
             vc.setData(item.id, msgs: message)
             
@@ -130,7 +137,7 @@ extension ChatListViewController: UITableViewDelegate, UITableViewDataSource {
         }
         
         
-//        self.navigationController?.pushViewController(vc, animated: true)
+        //        self.navigationController?.pushViewController(vc, animated: true)
         
         
     }
@@ -232,7 +239,7 @@ final class ChatListTableViewCell: UITableViewCell {
         self.unreadLb.text = chat.unreadCount
         self.imv.setImageFrom(chat.senderImg)
         self.nameLb.text = chat.sender
-        //        self.descLb.text = chat.sender.desc
+//        self.descLb.text = chat.sender
         self.chatLb.text = chat.lastMsg
         
     }
@@ -257,14 +264,13 @@ struct ChatThumbnail: Codable {
 
 struct User: Codable {
     
-    let id: String
-    var email: String = ""
-    var pw: String = ""
-    let profileImgUrl: String
-    let name: String
-    let desc: String
+    var email: String
+    var password: String
+    let imageUrl: String
+    let nickname: String
+    let description: String
     
-    var chat: Chat?
+    var id: String? = ""
     
 }
 
