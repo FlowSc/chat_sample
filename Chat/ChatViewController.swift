@@ -36,6 +36,15 @@ class ChatViewController: UIViewController {
             a.sendDate.timeIntervalSince1970 < b.sendDate.timeIntervalSince1970
         })
         self.tableView.reloadData()
+        
+        if self.messages.count > 0 {
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.tableView.scrollToRow(at: IndexPath(item: self.messages.count - 1, section: 0), at: .bottom, animated: false)
+
+            }
+            
+        }
     }
     
     
