@@ -16,6 +16,8 @@ class ChatViewController: UIViewController {
     
     var chatId: String?
     
+    var sender: User?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setUI()
@@ -23,29 +25,17 @@ class ChatViewController: UIViewController {
         tableView.dataSource = self
         tableView.separatorStyle = .none
         tableView.register(MessageTableViewCell.self, forCellReuseIdentifier: "MessageTableViewCell")
+        sendMessageView.delegate = self
         
-//        getDummy()
     }
     
-    func setData(_ id: String, msgs: [Message]) {
+    func setData(_ id: String, sender: User, msgs: [Message]) {
         self.chatId = id
+        self.sender = sender
         self.messages = msgs
         self.tableView.reloadData()
     }
     
-    func getDummy() {
-        
-        for i in 0...10 {
-            
-            let message = Message(id: "1", content: "안녕하ㅔ오머ㅏㄴ옴나ㅓ오머나오머ㅏㄴ와먼와ㅓㅁㄴ와ㅓㅁㄴ오\nashdjkashdkasd\nasdhjkasdhjaskdhjkashdjkashdkasj", date: "2020.1.1", isSended: i % 2 == 0)
-            
-            self.messages.append(message)
-            
-        }
-        
-        self.tableView.reloadData()
-        
-    }
     
     private func setUI() {
         
@@ -79,12 +69,20 @@ extension ChatViewController: UITableViewDelegate, UITableViewDataSource {
         
         cell.setMessage(messages[indexPath.row])
         
-        
         return cell
         
     }
     
-    
+}
+
+extension ChatViewController: SendMessageViewDelegate {
+    func sendMessage(_ message: String) {
+        guard let sender = sender else { return }
+        FireStoreManager.shared.sendMessage(chatId!, sender: sender, message: message) { (msg) in
+            self.messages.append(msg)
+            self.tableView.reloadData()
+        }
+    }
 }
 
 class MessageTableViewCell: UITableViewCell {
@@ -130,9 +128,9 @@ class MessageTableViewCell: UITableViewCell {
     func setMessage(_ message: Message) {
         
         tv.text = message.content
-        dateLb.text = message.date
+//        dateLb.text = message.send
         
-        if !message.isSended {
+        if !message.isMyMessage {
 
             tv.snp.remakeConstraints { (make) in
                 make.top.equalTo(10)
@@ -172,7 +170,7 @@ class MessageTableViewCell: UITableViewCell {
 }
 
 protocol SendMessageViewDelegate: class {
-    func sendMessage(_ message: Message)
+    func sendMessage(_ message: String)
 }
 
 class SendMessageView: UIView {
@@ -209,7 +207,12 @@ class SendMessageView: UIView {
         }
         
         sendBtn.backgroundColor = .red
+        sendBtn.addTarget(self, action: #selector(sendMessage(_:)), for: .touchUpInside)
         
+    }
+    
+    @objc func sendMessage(_ sender: UIButton) {
+        delegate?.sendMessage(textView.text)
     }
     
     required init?(coder: NSCoder) {

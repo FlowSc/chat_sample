@@ -9,11 +9,6 @@ import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-typealias FetchResult = (id: String, data: [String: Any])
-//typealias ChatResult = (chatId: String, other: String)
-typealias ChatThumbnailData = (chatId: String, userName: String, desc: String, content: String, lastDate: String)
-
-
 struct ChatResult: Codable {
     var chatId: String = ""
     let other: String
@@ -28,14 +23,23 @@ class FireStoreManager {
     
     private init() {}
     
-    func requestSignIn(_ id: String, pw: String, completion: @escaping (FetchResult?) -> ()) {
+    func requestSignIn(_ id: String, pw: String, completion: @escaping (User?) -> ()) {
         
         db.collection("users").whereField("email", isEqualTo: id).whereField("password", isEqualTo: pw).getDocuments { (snapshot, err) in
             
             guard let snapshot = snapshot else { return }
-            
-            let fetched = snapshot.documents.map { FetchResult($0.documentID, $0.data())}
-            
+                        
+            let fetched = snapshot.documents.map { doc -> User? in
+                
+                if var user = try? doc.data(as: User.self) {
+                    user.id = doc.documentID
+                    
+                    return user
+                } else {
+                    return nil
+                }
+            }
+                            
             if let result = fetched.first {
                 completion(result)
             } else {
@@ -122,30 +126,7 @@ class FireStoreManager {
             }
         }
     }
-    
-    
-    func getLastChat(_ chatId: String, userId: String, completion: @escaping (Message?) -> ()) {
         
-        db.collection("chats/\(chatId)/thread").getDocuments { (snapshot, err) in
-            
-            if let message = snapshot?.documents.last.map({ doc -> Message? in
-                
-                print(doc)
-                
-                guard let name = doc["name"] as? String,
-                      let content = doc["content"] as? String
-                else { return nil }
-                print(name)
-                return Message(id: "1", content: content, date: content, isSended: false)
-                
-            }) {
-                completion(message)
-            } else {
-                completion(nil)
-            }
-        }
-    }
-    
     func makeChat(_ myId: String, receiverId: String, completion: @escaping (String)->()) {
         
         db.collection("chats").whereField("owners", isEqualTo: [myId, receiverId].sorted())
@@ -165,16 +146,34 @@ class FireStoreManager {
             }
     }
     
-    func getChat(_ id: String, completion: @escaping ([Message])->()) {
+
+    func sendMessage(_ chatId: String, sender: User, message: String, completion: @escaping (Message)->()) {
         
-        db.collection("chats/\(id)/thread").getDocuments { (snapshot, err) in
+        db.collection("chats/\(chatId)/thread")
+            .addDocument(data: ["sender":sender.nickname,
+                                "content": message,
+                                "senderId": sender.id!,
+                                "sendDate": Date()
+        ]) { (err) in
+            print(err)
+        }
+        
+    }
+    
+    
+    func getChat(_ chatId: String, userId: String, completion: @escaping ([Message])->()) {
+        
+        db.collection("chats/\(chatId)/thread").getDocuments { (snapshot, err) in
             
             if let msgs = snapshot?.documents.map({ doc -> Message? in
                 
-                guard let name = doc["name"] as? String,
-                      let content = doc["content"] as? String else { return nil }
+                guard let name = doc["sender"] as? String,
+                      let content = doc["content"] as? String,
+                      let senderId = doc["senderId"] as? String,
+                      let sendDate = doc["sendDate"] as? Timestamp
+                else { return nil }
                 
-                return Message(id: "1", content: content, date: content, isSended: name == "s")
+                return Message(id: doc.documentID, content: content, sender: name, senderId: senderId, sendDate: sendDate.dateValue(), isMyMessage: userId == senderId)
             }).compactMap({ $0 }) {
                 completion(msgs)
             } else {

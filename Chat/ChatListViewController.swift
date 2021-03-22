@@ -12,25 +12,25 @@ class ChatListViewController: UIViewController {
     private let tableView = UITableView(frame: .zero, style: .plain)
     
     private(set) var chatList: [ChatThumbnail] = []
-    
-    private(set) var userDetail: (FetchResult)?
+        
+    private(set) var myInfo: User?
     
     @objc func moveToNewMessage() {
         
         let newChatVc = NewChatViewController()
         
-        newChatVc.myId = userDetail!.id
+        newChatVc.myId = myInfo!.id!
         
         self.navigationController?.pushViewController(newChatVc, animated: true)
         
         
     }
     
-    func setUser(_ result: FetchResult) {
+    func setUser(_ result: User) {
         
-        self.userDetail = result
+        self.myInfo = result
         
-        FireStoreManager.shared.getChatList(result.id) { (list) in
+        FireStoreManager.shared.getChatList(result.id!) { (list) in
             list.forEach { (chat) in
                 FireStoreManager.shared.getUser(chat.other) { (user) in
                     guard let user = user else { return }
@@ -103,9 +103,9 @@ extension ChatListViewController: UITableViewDelegate, UITableViewDataSource {
         
         let item = chatList[indexPath.row]
 
-        FireStoreManager.shared.getChat(item.id) { (message) in
+        FireStoreManager.shared.getChat(item.id, userId: myInfo!.id!) { (message) in
             let vc = ChatViewController()
-            vc.setData(item.id, msgs: message)
+            vc.setData(item.id, sender: self.myInfo!, msgs: message)
             self.navigationController?.pushViewController(vc, animated: true)
         }
     }
@@ -250,7 +250,9 @@ struct Chat: Codable {
 struct Message: Codable {
     let id: String
     let content: String
-    let date: String
-    let isSended: Bool
+    let sender: String
+    let senderId: String
+    let sendDate: Date
+    let isMyMessage: Bool
 }
 
