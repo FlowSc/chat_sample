@@ -32,7 +32,9 @@ class ChatViewController: UIViewController {
     func setData(_ id: String, sender: User, msgs: [Message]) {
         self.chatId = id
         self.sender = sender
-        self.messages = msgs
+        self.messages = msgs.sorted(by: { (a, b) -> Bool in
+            a.sendDate.timeIntervalSince1970 < b.sendDate.timeIntervalSince1970
+        })
         self.tableView.reloadData()
     }
     
@@ -79,8 +81,11 @@ extension ChatViewController: SendMessageViewDelegate {
     func sendMessage(_ message: String) {
         guard let sender = sender else { return }
         FireStoreManager.shared.sendMessage(chatId!, sender: sender, message: message) { (msg) in
+            guard let msg = msg else { return }
+            print(msg)
             self.messages.append(msg)
             self.tableView.reloadData()
+            self.tableView.scrollToRow(at: IndexPath(row: self.messages.count - 1, section: 0), at: .bottom, animated: false)
         }
     }
 }
@@ -130,7 +135,9 @@ class MessageTableViewCell: UITableViewCell {
         tv.text = message.content
 //        dateLb.text = message.send
         
-        if !message.isMyMessage {
+        guard let isMyMessage = message.isMyMessage else { return }
+        
+        if !isMyMessage {
 
             tv.snp.remakeConstraints { (make) in
                 make.top.equalTo(10)

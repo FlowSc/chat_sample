@@ -147,17 +147,33 @@ class FireStoreManager {
     }
     
 
-    func sendMessage(_ chatId: String, sender: User, message: String, completion: @escaping (Message)->()) {
+    func sendMessage(_ chatId: String, sender: User, message: String, completion: @escaping (Message?)->()) {
         
-        db.collection("chats/\(chatId)/thread")
+        let ref = db.collection("chats/\(chatId)/thread")
             .addDocument(data: ["sender":sender.nickname,
                                 "content": message,
                                 "senderId": sender.id!,
                                 "sendDate": Date()
-        ]) { (err) in
-            print(err)
+            ])
+        
+        let messageId = ref.documentID
+        
+        ref.getDocument { (doc, err) in
+            
+            print(doc?.data())
+            
+            if var msg = try? doc?.data(as: Message.self) {
+                msg.id = messageId
+                msg.isMyMessage = true
+                completion(msg)
+            } else {
+                completion(nil)
+            }
         }
         
+        
+        
+          
     }
     
     

@@ -248,11 +248,11 @@ struct Chat: Codable {
 }
 
 struct Message: Codable {
-    let id: String
+    var id: String? = ""
     let content: String
     let sender: String
     let senderId: String
     let sendDate: Date
-    let isMyMessage: Bool
+    var isMyMessage: Bool?
 }
 
