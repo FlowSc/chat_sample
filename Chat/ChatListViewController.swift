@@ -104,7 +104,6 @@ extension ChatListViewController: UITableViewDelegate, UITableViewDataSource {
         let item = chatList[indexPath.row]
 
         FireStoreManager.shared.getChat(item.id) { (message) in
-            print(message)
             let vc = ChatViewController()
             vc.setData(item.id, msgs: message)
             self.navigationController?.pushViewController(vc, animated: true)

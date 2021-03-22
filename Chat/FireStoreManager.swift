@@ -18,7 +18,7 @@ struct ChatResult: Codable {
     var chatId: String = ""
     let other: String
     let lastMsg: String
-    let lastMsgDate: String
+    let lastMsgDate: Date
 }
 
 class FireStoreManager {
@@ -108,8 +108,10 @@ class FireStoreManager {
                 let id = doc.documentID
                 let owners = doc.data()["owners"] as! [String]
                 let lastMsg = doc.data()["lastMsg"] as! String
+                let lastMsgDate = doc.data()["lastMsgDate"] as! Timestamp
+                
                 if let others = owners.filter({ $0 != userId}).first {
-                    return ChatResult(chatId: id, other: others, lastMsg: lastMsg, lastMsgDate: "")
+                    return ChatResult(chatId: id, other: others, lastMsg: lastMsg, lastMsgDate: lastMsgDate.dateValue())
                 } else {
                     return nil
                 }
