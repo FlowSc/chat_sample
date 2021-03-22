@@ -150,18 +150,21 @@ class FireStoreManager {
     func sendMessage(_ chatId: String, sender: User, message: String, completion: @escaping (Message?)->()) {
         
         let ref = db.collection("chats/\(chatId)/thread")
-            .addDocument(data: ["sender":sender.nickname,
-                                "content": message,
-                                "senderId": sender.id!,
-                                "sendDate": Date()
-            ])
-        
-        let messageId = ref.documentID
-        
-        ref.getDocument { (doc, err) in
             
-            print(doc?.data())
-            
+        
+        ref.parent?.updateData(["lastMsg":message,
+                                "lastMsgDate":Timestamp.init(date: Date())])
+        
+        let addDoc = ref.addDocument(data: ["sender":sender.nickname,
+                                            "content": message,
+                                            "senderId": sender.id!,
+                                            "sendDate": Date()
+                        ])
+        
+        let messageId = addDoc.documentID
+        
+        addDoc.getDocument { (doc, err) in
+                        
             if var msg = try? doc?.data(as: Message.self) {
                 msg.id = messageId
                 msg.isMyMessage = true
@@ -170,10 +173,6 @@ class FireStoreManager {
                 completion(nil)
             }
         }
-        
-        
-        
-          
     }
     
     
