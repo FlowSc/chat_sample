@@ -10,8 +10,16 @@ import FirebaseFirestore
 import FirebaseFirestoreSwift
 
 typealias FetchResult = (id: String, data: [String: Any])
-typealias ChatResult = (chatId: String, other: String)
+//typealias ChatResult = (chatId: String, other: String)
 typealias ChatThumbnailData = (chatId: String, userName: String, desc: String, content: String, lastDate: String)
+
+
+struct ChatResult: Codable {
+    var chatId: String = ""
+    let other: String
+    let lastMsg: String
+    let lastMsgDate: String
+}
 
 class FireStoreManager {
     
@@ -53,7 +61,7 @@ class FireStoreManager {
                 }.compactMap { $0 }.filter { $0.id != myId}
                 
                 completion(user)
-            
+                
             }
         
     }
@@ -92,33 +100,20 @@ class FireStoreManager {
     }
     
     func getChatList(_ userId: String, completion: @escaping (([ChatResult]) -> ())) {
-                
+        
         db.collection("chats").whereField("owners", arrayContains: userId).getDocuments { (snapshot, err) in
-                        
-            if let chatList = snapshot?.documents.map({ doc -> ChatResult in
+            
+            if let chatList = snapshot?.documents.map({ doc -> ChatResult? in
                 
                 let id = doc.documentID
                 let owners = doc.data()["owners"] as! [String]
-                
-                if let others = owners.filter({ $0 != userId }).first {
-                    
-                    self.db.collection("users").document(others).getDocument { (userSnapshop, err) in
-                        
-
-                        
-
-                        var user = try? userSnapshop?.data(as: User.self)
-
-                        user?.id = id
-                        
-                        print(user, "DD")
-                    }
-                    
-                    return ChatResult(id, others)
+                let lastMsg = doc.data()["lastMsg"] as! String
+                if let others = owners.filter({ $0 != userId}).first {
+                    return ChatResult(chatId: id, other: others, lastMsg: lastMsg, lastMsgDate: "")
                 } else {
-                    return ChatResult(id, "")
+                    return nil
                 }
-            }) {
+            }).compactMap({ $0 }) {
                 completion(chatList)
             } else {
                 completion([])
@@ -137,7 +132,6 @@ class FireStoreManager {
                 
                 guard let name = doc["name"] as? String,
                       let content = doc["content"] as? String
-                //                      let id = doc["senderId"] as? String
                 else { return nil }
                 print(name)
                 return Message(id: "1", content: content, date: content, isSended: false)
@@ -152,20 +146,13 @@ class FireStoreManager {
     
     func makeChat(_ myId: String, receiverId: String, completion: @escaping (String)->()) {
         
-        print([myId, receiverId].sorted(), "ID?")
-        
         db.collection("chats").whereField("owners", isEqualTo: [myId, receiverId].sorted())
             .getDocuments { (docs, err) in
                 if let _docs = docs {
-                    
-                    print(_docs.count, "COUNT")
-                    
                     if _docs.count == 0 {
                         let newChatId = self.db.collection("chats").addDocument(data: ["owners": [myId, receiverId].sorted()
                         ]) { err in
-                            
                         }.documentID
-                        
                         completion(newChatId)
                     } else {
                         if let existed = _docs.documents.map({ $0.documentID }).first {
@@ -175,7 +162,6 @@ class FireStoreManager {
                 }
             }
     }
-    
     
     func getChat(_ id: String, completion: @escaping ([Message])->()) {
         
@@ -194,6 +180,18 @@ class FireStoreManager {
             }
             
         }
+    }
+    
+    func getUser(_ id: String, completion: @escaping (User?)->()) {
+        
+        db.collection("users").document(id).getDocument { (snapshot, err) in
+            if let user = try? snapshot?.data(as: User.self) {
+                completion(user)
+            } else {
+                completion(nil)
+            }
+        }
+        
     }
     
 }
