@@ -26,6 +26,9 @@
 		75BDCC7B2609D0FC00B7A7F5 /* SearchHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75BDCC7A2609D0FC00B7A7F5 /* SearchHeaderView.swift */; };
 		75BDCC802609D11600B7A7F5 /* NewChatTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75BDCC7F2609D11600B7A7F5 /* NewChatTableViewCell.swift */; };
 		75BDCC852609D14200B7A7F5 /* DebounceTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75BDCC842609D14200B7A7F5 /* DebounceTextField.swift */; };
+		75BDCCA52609D4F300B7A7F5 /* Entities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75BDCCA42609D4F300B7A7F5 /* Entities.swift */; };
+		75BDCCAA2609D6B200B7A7F5 /* UIView_Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75BDCCA92609D6B200B7A7F5 /* UIView_Extension.swift */; };
+		75BDCCAF2609D6BF00B7A7F5 /* UIColor_Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75BDCCAE2609D6BF00B7A7F5 /* UIColor_Extension.swift */; };
 		CEC5355523D7B8A93F5497CA /* Pods_ChatTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D4D901FB1CC7D33A71714BD6 /* Pods_ChatTests.framework */; };
 		DC12B7EB2AD13D132F14ED4B /* Pods_ChatUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 191420B79ED451C30ED33612 /* Pods_ChatUITests.framework */; };
 		E220B0BCD47DB5EB30C77907 /* Pods_Chat.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 98E502F84C6FC3398709E67A /* Pods_Chat.framework */; };
@@ -78,6 +81,9 @@
 		75BDCC7A2609D0FC00B7A7F5 /* SearchHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchHeaderView.swift; sourceTree = "<group>"; };
 		75BDCC7F2609D11600B7A7F5 /* NewChatTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewChatTableViewCell.swift; sourceTree = "<group>"; };
 		75BDCC842609D14200B7A7F5 /* DebounceTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebounceTextField.swift; sourceTree = "<group>"; };
+		75BDCCA42609D4F300B7A7F5 /* Entities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Entities.swift; sourceTree = "<group>"; };
+		75BDCCA92609D6B200B7A7F5 /* UIView_Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIView_Extension.swift; sourceTree = "<group>"; };
+		75BDCCAE2609D6BF00B7A7F5 /* UIColor_Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColor_Extension.swift; sourceTree = "<group>"; };
 		98E502F84C6FC3398709E67A /* Pods_Chat.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Chat.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF249713F055CA5026FAB3AB /* Pods-ChatTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ChatTests.debug.xcconfig"; path = "Target Support Files/Pods-ChatTests/Pods-ChatTests.debug.xcconfig"; sourceTree = "<group>"; };
 		D14CC16CEE5CBDAEA5F1B9C0 /* Pods-Chat.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Chat.debug.xcconfig"; path = "Target Support Files/Pods-Chat/Pods-Chat.debug.xcconfig"; sourceTree = "<group>"; };
@@ -154,19 +160,20 @@
 				7522F46D2604E3660037CBE0 /* AppDelegate.swift */,
 				7522F4762604E3760037CBE0 /* Assets.xcassets */,
 				7522F4782604E3760037CBE0 /* LaunchScreen.storyboard */,
+				7522F4B22604E4900037CBE0 /* SignInViewController.swift */,
+				7522F4B42604E4900037CBE0 /* SignUpViewController.swift */,
 				7522F4B12604E4900037CBE0 /* ChatListViewController.swift */,
-				75BDCC6B2609CFEF00B7A7F5 /* ChatListTableViewCell.swift */,
+				7522F4D626059D6D0037CBE0 /* NewChatViewController.swift */,
 				7522F4D126059D660037CBE0 /* ChatViewController.swift */,
+				75BDCC6B2609CFEF00B7A7F5 /* ChatListTableViewCell.swift */,
 				75BDCC752609D0A400B7A7F5 /* SendMessageView.swift */,
 				75BDCC702609D08300B7A7F5 /* MessageTableViewCell.swift */,
-				7522F4D626059D6D0037CBE0 /* NewChatViewController.swift */,
 				75BDCC842609D14200B7A7F5 /* DebounceTextField.swift */,
 				75BDCC7F2609D11600B7A7F5 /* NewChatTableViewCell.swift */,
 				75BDCC7A2609D0FC00B7A7F5 /* SearchHeaderView.swift */,
-				7522F4B22604E4900037CBE0 /* SignInViewController.swift */,
-				7522F4B42604E4900037CBE0 /* SignUpViewController.swift */,
-				7522F4DB2605A2B00037CBE0 /* UIImageView_Extension.swift */,
+				75BDCCB32609D6D700B7A7F5 /* Extensions */,
 				7522F52C260714850037CBE0 /* FireStoreManager.swift */,
+				75BDCCA42609D4F300B7A7F5 /* Entities.swift */,
 				7522F4C42604E5C50037CBE0 /* GoogleService-Info.plist */,
 				7522F47B2604E3760037CBE0 /* Info.plist */,
 			);
@@ -189,6 +196,16 @@
 				7522F4912604E3760037CBE0 /* Info.plist */,
 			);
 			path = ChatUITests;
+			sourceTree = "<group>";
+		};
+		75BDCCB32609D6D700B7A7F5 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				7522F4DB2605A2B00037CBE0 /* UIImageView_Extension.swift */,
+				75BDCCA92609D6B200B7A7F5 /* UIView_Extension.swift */,
+				75BDCCAE2609D6BF00B7A7F5 /* UIColor_Extension.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 		9FBA7D8BBD2AAF5682B5C752 /* Frameworks */ = {
@@ -421,16 +438,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				75BDCCA52609D4F300B7A7F5 /* Entities.swift in Sources */,
 				75BDCC852609D14200B7A7F5 /* DebounceTextField.swift in Sources */,
 				7522F4D726059D6D0037CBE0 /* NewChatViewController.swift in Sources */,
 				7522F4B82604E4900037CBE0 /* SignUpViewController.swift in Sources */,
 				7522F4B62604E4900037CBE0 /* SignInViewController.swift in Sources */,
 				75BDCC712609D08300B7A7F5 /* MessageTableViewCell.swift in Sources */,
+				75BDCCAA2609D6B200B7A7F5 /* UIView_Extension.swift in Sources */,
 				7522F4B52604E4900037CBE0 /* ChatListViewController.swift in Sources */,
 				7522F46E2604E3660037CBE0 /* AppDelegate.swift in Sources */,
 				75BDCC762609D0A400B7A7F5 /* SendMessageView.swift in Sources */,
 				7522F4D226059D660037CBE0 /* ChatViewController.swift in Sources */,
 				75BDCC6C2609CFEF00B7A7F5 /* ChatListTableViewCell.swift in Sources */,
+				75BDCCAF2609D6BF00B7A7F5 /* UIColor_Extension.swift in Sources */,
 				75BDCC802609D11600B7A7F5 /* NewChatTableViewCell.swift in Sources */,
 				7522F4DC2605A2B00037CBE0 /* UIImageView_Extension.swift in Sources */,
 				7522F52D260714850037CBE0 /* FireStoreManager.swift in Sources */,

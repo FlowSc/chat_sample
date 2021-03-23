@@ -15,27 +15,19 @@ class ChatListViewController: UIViewController {
         
     private(set) var myInfo: User?
     
-    @objc func moveToNewMessage() {
-        
-        let newChatVc = NewChatViewController()
-        
-        newChatVc.myId = myInfo!.id!
-        
-        self.navigationController?.pushViewController(newChatVc, animated: true)
-                
-    }
-    
-    
-    func setUser(_ result: User) {
-        
-        self.myInfo = result
-        
-  
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setUI()
+        setTableView()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         getChatList()
+    }
+    
+    func setUser(_ result: User) {
+        self.myInfo = result
     }
     
     func getChatList() {
@@ -54,19 +46,6 @@ class ChatListViewController: UIViewController {
                 }
             }
         }
-    }
-    
-    @objc func logOut() {
-        
-        UserDefaults.standard.removeObject(forKey: "loginUser")
-        self.dismiss(animated: true, completion: nil)
-        
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        setUI()
-        setTableView()
     }
     
     private func setUI() {
@@ -96,6 +75,25 @@ class ChatListViewController: UIViewController {
         self.tableView.separatorStyle = .none
     }
     
+    @objc func moveToNewMessage() {
+        
+        guard let myId = myInfo?.id else { return }
+        
+        let newChatVc = NewChatViewController()
+        
+        newChatVc.myId = myId
+        
+        self.navigationController?.pushViewController(newChatVc, animated: true)
+                
+    }
+    
+    @objc func logOut() {
+        
+        UserDefaults.standard.removeObject(forKey: "loginUser")
+        self.dismiss(animated: true, completion: nil)
+        
+    }
+    
 }
 
 extension ChatListViewController: UITableViewDelegate, UITableViewDataSource {
@@ -119,49 +117,11 @@ extension ChatListViewController: UITableViewDelegate, UITableViewDataSource {
         let item = chatList[indexPath.row]
         
         let vc = ChatViewController()
-        vc.setData(item.id, sender: self.myInfo!)
+        guard let sender = self.myInfo else { return }
+        vc.setData(item.id, sender: sender)
         self.navigationController?.pushViewController(vc, animated: true)
 
     }
     
-}
-
-
-struct ChatThumbnail: Codable {
-    
-    let id: String
-    let lastDate: String
-    let unreadCount: String
-    let sender: String
-    let senderImg: String
-    let senderDesc: String
-    let lastMsg: String
-    
-}
-
-struct User: Codable {
-    
-    var email: String
-    var password: String
-    let imageUrl: String
-    let nickname: String
-    let description: String
-    
-    var id: String? = ""
-    
-}
-
-struct Chat: Codable {
-    let id: String
-    let message: [Message]
-}
-
-struct Message: Codable {
-    var id: String? = ""
-    let content: String
-    let sender: String
-    let senderId: String
-    let sendDate: Date
-    var isMyMessage: Bool?
 }
 

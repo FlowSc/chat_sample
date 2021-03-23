@@ -145,34 +145,6 @@ class SignInViewController: UIViewController {
 
 }
 
-extension SignInViewController: UITextFieldDelegate {
-    
-}
+extension SignInViewController: UITextFieldDelegate { }
 
-extension UIView {
-    
-    func addSubviews(_ views: [UIView]) {
-        views.forEach { self.addSubview($0) }
-    }
-    
-    func setBorder(radius: CGFloat, width: CGFloat = 1, color: UIColor = UIColor.black) {
-        
-        self.layer.cornerRadius = radius
-        self.layer.borderWidth = width
-        self.layer.borderColor = color.cgColor
-        self.clipsToBounds = true
-        
-    }
-}
 
-extension UIColor {
-    
-    static func white(_ point: CGFloat) -> UIColor {
-        return UIColor(white: point / 255, alpha: 1)
-    }
-    
-    static var white233: UIColor {
-        return UIColor(white: 233/255, alpha: 1)
-    }
-    
-}

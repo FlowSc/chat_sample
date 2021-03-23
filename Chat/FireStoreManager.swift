@@ -9,12 +9,6 @@ import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-struct ChatResult: Codable {
-    var chatId: String = ""
-    let other: String
-    let lastMsg: String
-    let lastMsgDate: Date
-}
 
 class FireStoreManager {
     

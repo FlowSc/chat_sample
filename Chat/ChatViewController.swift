@@ -10,26 +10,38 @@ import UIKit
 class ChatViewController: UIViewController {
     
     private let tableView = UITableView()
-    let sendMessageView = SendMessageView()
+    private let sendMessageView = SendMessageView()
     
-    var messages: [Message] = []
+    private(set) var messages: [Message] = []
+    private(set) var chatId: String?
+    private(set) var sender: User?
     
-    var chatId: String?
-    
-    var sender: User?
-    
-    var isKeyboardOn: Bool = false
-    
+    private var isKeyboardOn: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         setUI()
+        setTableView()
+        setKeyboardNotifications()
+        addChattigObserver()
+      
+    }
+    
+    func setTableView() {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.separatorStyle = .none
         tableView.register(MessageTableViewCell.self, forCellReuseIdentifier: "MessageTableViewCell")
         sendMessageView.delegate = self
-        
+    }
+    
+    func setKeyboardNotifications() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillDisappear), name: UIResponder.keyboardWillHideNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillAppear), name: UIResponder.keyboardWillShowNotification, object: nil)
+    }
+    
+    func addChattigObserver() {
         FireStoreManager.shared.observeChat(self.chatId!, userId: sender!.id!) { (msgs) in
                         
             self.messages += msgs.sorted(by: { (a, b) -> Bool in
@@ -38,9 +50,6 @@ class ChatViewController: UIViewController {
             self.tableView.reloadData()
             self.tableView.scrollToRow(at: IndexPath(row: self.messages.count - 1, section: 0), at: .bottom, animated: false)
         }
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillDisappear), name: UIResponder.keyboardWillHideNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillAppear), name: UIResponder.keyboardWillShowNotification, object: nil)
     }
     
     func setData(_ id: String, sender: User) {
@@ -49,7 +58,6 @@ class ChatViewController: UIViewController {
         self.tableView.reloadData()
         
     }
-    
     
     private func setUI() {
         
@@ -99,7 +107,7 @@ extension ChatViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "MessageTableViewCell", for: indexPath) as! MessageTableViewCell
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "MessageTableViewCell", for: indexPath) as? MessageTableViewCell else { return UITableViewCell() }
         
         cell.setMessage(messages[indexPath.row])
         
@@ -109,6 +117,7 @@ extension ChatViewController: UITableViewDelegate, UITableViewDataSource {
 }
 
 extension ChatViewController: SendMessageViewDelegate {
+    
     func focusTextView(_ sender: UITextView) {
         
     }
