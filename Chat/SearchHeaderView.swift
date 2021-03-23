@@ -80,18 +80,11 @@ class SearchHeaderView: UIView {
 
 extension SearchHeaderView: UITextFieldDelegate {
     
-    func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
-        
-        UIView.animate(withDuration: 0.5) { [weak self] in
-            guard let self = self else { return }
-            self.bottomLine.backgroundColor = .white233
-            self.titleLb.textColor = .white233
-            self.titleLb.font = UIFont.systemFont(ofSize: 13)
-            self.layoutIfNeeded()
-        }
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+
+        textField.resignFirstResponder()
         
         return true
-        
     }
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
@@ -99,8 +92,7 @@ extension SearchHeaderView: UITextFieldDelegate {
             guard let self = self else { return }
             self.bottomLine.backgroundColor = .blue
             self.titleLb.textColor = .blue
-            self.titleLb.font = UIFont.systemFont(ofSize: 11)
-            self.layoutIfNeeded()
+            self.titleLb.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
         }
     }
     
@@ -109,8 +101,7 @@ extension SearchHeaderView: UITextFieldDelegate {
             guard let self = self else { return }
             self.bottomLine.backgroundColor = .white233
             self.titleLb.textColor = .white233
-            self.titleLb.font = UIFont.systemFont(ofSize: 13)
-            self.layoutIfNeeded()
+            self.titleLb.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
         }
     }
 }
