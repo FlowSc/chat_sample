@@ -15,8 +15,8 @@ class NewChatViewController: UIViewController {
     
     var connectedUsers: [User] = []
     
-    var myId: String = ""
-
+    var myInfo: User?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -32,8 +32,8 @@ class NewChatViewController: UIViewController {
         
     }
     
-    func setData(_ myId: String) {
-        
+    func setData(_ info: User?) {
+        self.myInfo = info
     }
     
     private func setUI() {
@@ -68,15 +68,24 @@ extension NewChatViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         let item = connectedUsers[indexPath.item]
+        
+        guard let id = self.myInfo?.id, let receiverId = item.id else { return }
                 
-        FireStoreManager.shared.makeChat(myId, receiverId: item.id!) { str in
+        FireStoreManager.shared.makeChat(id, receiverId: receiverId) { str in
             print(str, "ID")
+            
+            let vc = ChatViewController()
+            guard let sender = self.myInfo else { return }
+            vc.setData(str, sender: sender)
+            self.navigationController?.pushViewController(vc, animated: true)
+            
         }
     }
 }
 
 extension NewChatViewController: SearchHeaderViewDelegate {
     func findKeywordChanged(_ text: String) {
+        guard let myId = self.myInfo?.id else { return }
         FireStoreManager.shared.findUser(text, myId: myId) { (res) in
             self.connectedUsers = res
             self.tableView.reloadData()

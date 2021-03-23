@@ -125,11 +125,17 @@ class SignUpViewController: UIViewController {
         
        
         
-        let newUser = User(email: id, password: pw, imageUrl: "", nickname: nickname, description: "", id: "")
+        let newUser = User(email: id, password: pw, imageUrl: "", nickname: nickname, description: descTf.text ?? "", id: "")
         
         FireStoreManager.shared.addUser(user: newUser) { (isSuccess) in
             if isSuccess {
+                
+                if let user = try? JSONEncoder().encode(newUser) {
+                    UserDefaults.standard.set(user, forKey: "loginUser")
+                }
+                
                 let chatListVc = ChatListViewController()
+                chatListVc.setUser(newUser)
                 let nVc = UINavigationController(rootViewController: chatListVc)
                 nVc.modalPresentationStyle = .fullScreen
                 self.present(nVc, animated: true) {

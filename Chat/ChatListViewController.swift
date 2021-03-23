@@ -81,7 +81,7 @@ class ChatListViewController: UIViewController {
         
         let newChatVc = NewChatViewController()
         
-        newChatVc.myId = myId
+        newChatVc.setData(myInfo)
         
         self.navigationController?.pushViewController(newChatVc, animated: true)
                 

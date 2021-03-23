@@ -106,9 +106,9 @@ class FireStoreManager {
             if let chatList = snapshot?.documents.map({ doc -> ChatResult? in
                 
                 let id = doc.documentID
-                let owners = doc.data()["owners"] as! [String]
-                let lastMsg = doc.data()["lastMsg"] as! String
-                let lastMsgDate = doc.data()["lastMsgDate"] as! Timestamp
+                guard let owners = doc.data()["owners"] as? [String],
+                let lastMsg = doc.data()["lastMsg"] as? String,
+                let lastMsgDate = doc.data()["lastMsgDate"] as? Timestamp else { return nil }
                 
                 if let others = owners.filter({ $0 != userId}).first {
                     return ChatResult(chatId: id, other: others, lastMsg: lastMsg, lastMsgDate: lastMsgDate.dateValue())
