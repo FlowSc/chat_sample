@@ -10,6 +10,16 @@ import UIKit
 
 final class ChatListTableViewCell: UITableViewCell {
     
+    var dateFormatter: DateFormatter {
+        
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        
+        return formatter
+        
+    }
+    
     private let imv = UIImageView()
     private let nameLb = UILabel()
     private let descLb = UILabel()
@@ -91,21 +101,35 @@ final class ChatListTableViewCell: UITableViewCell {
         imv.backgroundColor = UIColor.white233
         bottomLine.backgroundColor = UIColor.white233
         dateLb.textColor = UIColor.white(200)
-        unreadLb.backgroundColor = .red
         nameLb.font = UIFont.systemFont(ofSize: 14, weight: .bold)
         descLb.font = UIFont.systemFont(ofSize: 12)
         chatLb.font = UIFont.systemFont(ofSize: 13)
         dateLb.font = UIFont.systemFont(ofSize: 11)
         dateLb.textAlignment = .right
-        unreadLb.font = UIFont.systemFont(ofSize: 11)
-        unreadLb.textColor = .white
-        unreadLb.textAlignment = .center
-        unreadLb.setBorder(radius: 8, width: 1, color: .clear)
+        
+//        unreadLb.backgroundColor = .red
+//        unreadLb.font = UIFont.systemFont(ofSize: 11)
+//        unreadLb.textColor = .white
+//        unreadLb.textAlignment = .center
+//        unreadLb.setBorder(radius: 8, width: 1, color: .clear)
         
     }
     
     func setData(_ chat: ChatThumbnail) {
-        self.dateLb.text = chat.lastDate
+        
+        let interval = chat.lastDate.timeIntervalSince1970 - Date().timeIntervalSince1970
+        
+        if interval > 86400 {
+            if interval > 86400 * 2 {
+                self.dateLb.text = "\(interval / 86400)일 전"
+            } else {
+                self.dateLb.text = "어제"
+            }
+        } else {
+            self.dateLb.text = dateFormatter.string(from: chat.lastDate)
+        }
+        
+        
         self.unreadLb.text = chat.unreadCount
         self.imv.setImageFrom(chat.senderImg)
         self.nameLb.text = chat.sender

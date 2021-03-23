@@ -37,7 +37,7 @@ class ChatListViewController: UIViewController {
             list.forEach { (chat) in
                 FireStoreManager.shared.getUser(chat.other) { (user) in
                     guard let user = user else { return }
-                    let chatThumbnail = ChatThumbnail(id: chat.chatId, lastDate: "", unreadCount: "", sender: user.nickname, senderImg: user.imageUrl, senderDesc: user.description, lastMsg: chat.lastMsg)
+                    let chatThumbnail = ChatThumbnail(id: chat.chatId, lastDate: chat.lastMsgDate, unreadCount: "", sender: user.nickname, senderImg: user.imageUrl, senderDesc: user.description, lastMsg: chat.lastMsg)
                     self.chatList.append(chatThumbnail)
                     if list.count == self.chatList.count {
                         
@@ -76,9 +76,7 @@ class ChatListViewController: UIViewController {
     }
     
     @objc func moveToNewMessage() {
-        
-        guard let myId = myInfo?.id else { return }
-        
+                
         let newChatVc = NewChatViewController()
         
         newChatVc.setData(myInfo)

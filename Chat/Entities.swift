@@ -10,7 +10,7 @@ import Foundation
 struct ChatThumbnail: Codable {
     
     let id: String
-    let lastDate: String
+    let lastDate: Date
     let unreadCount: String
     let sender: String
     let senderImg: String
