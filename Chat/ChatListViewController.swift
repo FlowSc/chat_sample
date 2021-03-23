@@ -35,13 +35,17 @@ class ChatListViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        getChatList()
+    }
+    
+    func getChatList() {
         guard let myId = myInfo?.id else { return }
         FireStoreManager.shared.getChatList(myId) { (list) in
             self.chatList = []
             list.forEach { (chat) in
                 FireStoreManager.shared.getUser(chat.other) { (user) in
                     guard let user = user else { return }
-                    let chatThumbnail = ChatThumbnail(id: chat.chatId, lastDate: "", unreadCount: "", sender: user.nickname, senderImg: user.imageUrl, lastMsg: chat.lastMsg)
+                    let chatThumbnail = ChatThumbnail(id: chat.chatId, lastDate: "", unreadCount: "", sender: user.nickname, senderImg: user.imageUrl, senderDesc: user.description, lastMsg: chat.lastMsg)
                     self.chatList.append(chatThumbnail)
                     if list.count == self.chatList.count {
                         
@@ -53,16 +57,16 @@ class ChatListViewController: UIViewController {
     }
     
     @objc func logOut() {
+        
         UserDefaults.standard.removeObject(forKey: "loginUser")
         self.dismiss(animated: true, completion: nil)
+        
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setUI()
         setTableView()
-        
-//        updateList()
     }
     
     private func setUI() {
@@ -111,9 +115,7 @@ extension ChatListViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
-        print(indexPath.row, "ROW")
-        
+                
         let item = chatList[indexPath.row]
         
         let vc = ChatViewController()
@@ -124,111 +126,6 @@ extension ChatListViewController: UITableViewDelegate, UITableViewDataSource {
     
 }
 
-final class ChatListTableViewCell: UITableViewCell {
-    
-    private let imv = UIImageView()
-    private let nameLb = UILabel()
-    private let descLb = UILabel()
-    private let chatLb = UILabel()
-    private let dateLb = UILabel()
-    private let unreadLb = UILabel()
-    private let bottomLine = UIView()
-    
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        setUI()
-    }
-    
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        self.imv.image = nil
-        self.nameLb.text = nil
-        self.descLb.text = nil
-        self.dateLb.text = nil
-        self.unreadLb.text = nil
-        self.chatLb.text = nil
-    }
-    
-    private func setUI() {
-        
-        self.selectionStyle = .none
-        
-        self.addSubviews([imv, nameLb, descLb, chatLb, dateLb, unreadLb, bottomLine])
-        
-        imv.snp.makeConstraints { (make) in
-            make.top.leading.equalTo(16)
-            make.size.equalTo(40)
-        }
-        
-        imv.setBorder(radius: 3, width: 1, color: .clear)
-        
-        nameLb.snp.makeConstraints { (make) in
-            make.top.equalTo(imv.snp.top).offset(3)
-            make.leading.equalTo(imv.snp.trailing).offset(10)
-            make.height.equalTo(16)
-        }
-        
-        descLb.snp.makeConstraints { (make) in
-            make.top.equalTo(nameLb.snp.bottom).offset(3)
-            make.leading.equalTo(nameLb.snp.leading)
-        }
-        
-        chatLb.snp.makeConstraints { (make) in
-            make.top.equalTo(descLb.snp.bottom).offset(5)
-            make.leading.equalTo(nameLb.snp.leading)
-        }
-        
-        unreadLb.snp.makeConstraints { (make) in
-            make.centerY.equalTo(chatLb.snp.centerY)
-            make.trailing.equalTo(-16)
-            make.width.equalTo(25)
-            make.height.equalTo(16)
-        }
-        
-        dateLb.snp.makeConstraints { (make) in
-            make.centerY.equalTo(nameLb.snp.centerY)
-            make.trailing.equalTo(-16)
-            make.height.equalTo(16)
-        }
-        
-        bottomLine.snp.makeConstraints { (make) in
-            make.top.equalTo(chatLb.snp.bottom).offset(20)
-            make.leading.equalTo(nameLb.snp.leading)
-            make.height.equalTo(1)
-            make.trailing.equalToSuperview()
-            make.bottom.equalToSuperview()
-        }
-        
-        imv.backgroundColor = UIColor.white233
-        bottomLine.backgroundColor = UIColor.white233
-        dateLb.textColor = UIColor.white(200)
-        unreadLb.backgroundColor = .red
-        nameLb.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        descLb.font = UIFont.systemFont(ofSize: 12)
-        chatLb.font = UIFont.systemFont(ofSize: 13)
-        dateLb.font = UIFont.systemFont(ofSize: 11)
-        dateLb.textAlignment = .right
-        unreadLb.font = UIFont.systemFont(ofSize: 11)
-        unreadLb.textColor = .white
-        unreadLb.textAlignment = .center
-        unreadLb.setBorder(radius: 8, width: 1, color: .clear)
-    }
-    
-    func setData(_ chat: ChatThumbnail) {
-        self.dateLb.text = chat.lastDate
-        self.unreadLb.text = chat.unreadCount
-        self.imv.setImageFrom(chat.senderImg)
-        self.nameLb.text = chat.sender
-//        self.descLb.text = chat.sender
-        self.chatLb.text = chat.lastMsg
-        
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-}
 
 struct ChatThumbnail: Codable {
     
@@ -237,8 +134,8 @@ struct ChatThumbnail: Codable {
     let unreadCount: String
     let sender: String
     let senderImg: String
+    let senderDesc: String
     let lastMsg: String
-    
     
 }
 
