@@ -68,30 +68,20 @@ extension NewChatViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
         let item = connectedUsers[indexPath.item]
-        
-        print(item)
-        
+                
         FireStoreManager.shared.makeChat(myId, receiverId: item.id!) { str in
             print(str, "ID")
         }
-        
     }
-    
-    
 }
 
 extension NewChatViewController: SearchHeaderViewDelegate {
     func findKeywordChanged(_ text: String) {
-        print(text)
-        
         FireStoreManager.shared.findUser(text, myId: myId) { (res) in
-            print(res.count)
             self.connectedUsers = res
             self.tableView.reloadData()
         }
     }
-    
-    
 }
 
 protocol SearchHeaderViewDelegate: class {

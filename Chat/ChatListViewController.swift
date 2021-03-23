@@ -22,21 +22,29 @@ class ChatListViewController: UIViewController {
         newChatVc.myId = myInfo!.id!
         
         self.navigationController?.pushViewController(newChatVc, animated: true)
-        
-        
+                
     }
+    
     
     func setUser(_ result: User) {
         
         self.myInfo = result
         
-        FireStoreManager.shared.getChatList(result.id!) { (list) in
+  
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        guard let myId = myInfo?.id else { return }
+        FireStoreManager.shared.getChatList(myId) { (list) in
+            self.chatList = []
             list.forEach { (chat) in
                 FireStoreManager.shared.getUser(chat.other) { (user) in
                     guard let user = user else { return }
                     let chatThumbnail = ChatThumbnail(id: chat.chatId, lastDate: "", unreadCount: "", sender: user.nickname, senderImg: user.imageUrl, lastMsg: chat.lastMsg)
                     self.chatList.append(chatThumbnail)
                     if list.count == self.chatList.count {
+                        
                         self.tableView.reloadData()
                     }
                 }
@@ -45,6 +53,7 @@ class ChatListViewController: UIViewController {
     }
     
     @objc func logOut() {
+        UserDefaults.standard.removeObject(forKey: "loginUser")
         self.dismiss(animated: true, completion: nil)
     }
     
@@ -52,6 +61,8 @@ class ChatListViewController: UIViewController {
         super.viewDidLoad()
         setUI()
         setTableView()
+        
+//        updateList()
     }
     
     private func setUI() {
@@ -101,13 +112,14 @@ extension ChatListViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
+        print(indexPath.row, "ROW")
+        
         let item = chatList[indexPath.row]
+        
+        let vc = ChatViewController()
+        vc.setData(item.id, sender: self.myInfo!)
+        self.navigationController?.pushViewController(vc, animated: true)
 
-        FireStoreManager.shared.getChat(item.id, userId: myInfo!.id!) { (message) in
-            let vc = ChatViewController()
-            vc.setData(item.id, sender: self.myInfo!, msgs: message)
-            self.navigationController?.pushViewController(vc, animated: true)
-        }
     }
     
 }

@@ -18,6 +18,9 @@ class ChatViewController: UIViewController {
     
     var sender: User?
     
+    var isKeyboardOn: Bool = false
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setUI()
@@ -27,31 +30,31 @@ class ChatViewController: UIViewController {
         tableView.register(MessageTableViewCell.self, forCellReuseIdentifier: "MessageTableViewCell")
         sendMessageView.delegate = self
         
+        FireStoreManager.shared.observeChat(self.chatId!, userId: sender!.id!) { (msgs) in
+                        
+            self.messages += msgs.sorted(by: { (a, b) -> Bool in
+                a.sendDate.timeIntervalSince1970 < b.sendDate.timeIntervalSince1970
+            })
+            self.tableView.reloadData()
+            self.tableView.scrollToRow(at: IndexPath(row: self.messages.count - 1, section: 0), at: .bottom, animated: false)
+        }
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillDisappear), name: UIResponder.keyboardWillHideNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillAppear), name: UIResponder.keyboardWillShowNotification, object: nil)
     }
     
-    func setData(_ id: String, sender: User, msgs: [Message]) {
+    func setData(_ id: String, sender: User) {
         self.chatId = id
         self.sender = sender
-        self.messages = msgs.sorted(by: { (a, b) -> Bool in
-            a.sendDate.timeIntervalSince1970 < b.sendDate.timeIntervalSince1970
-        })
         self.tableView.reloadData()
         
-        if self.messages.count > 0 {
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                self.tableView.scrollToRow(at: IndexPath(item: self.messages.count - 1, section: 0), at: .bottom, animated: false)
-
-            }
-            
-        }
     }
     
     
     private func setUI() {
         
         self.view.addSubviews([tableView, sendMessageView])
-
+        
         sendMessageView.snp.makeConstraints { (make) in
             make.leading.trailing.equalToSuperview()
             make.height.greaterThanOrEqualTo(40)
@@ -65,7 +68,27 @@ class ChatViewController: UIViewController {
         }
         
     }
-  
+    
+    @objc func keyboardWillAppear(_ notification: NSNotification) {
+                
+        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
+            if !isKeyboardOn {
+                self.view.frame.origin.y -= keyboardSize.height
+                isKeyboardOn = true
+            }
+        }
+    }
+    
+    @objc func keyboardWillDisappear(_ notification: NSNotification) {
+        
+        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
+            if isKeyboardOn {
+                self.view.frame.origin.y += keyboardSize.height
+                isKeyboardOn = false
+            }
+        }
+    }
+    
 }
 
 extension ChatViewController: UITableViewDelegate, UITableViewDataSource {
@@ -83,18 +106,19 @@ extension ChatViewController: UITableViewDelegate, UITableViewDataSource {
         return cell
         
     }
-    
 }
 
 extension ChatViewController: SendMessageViewDelegate {
+    func focusTextView(_ sender: UITextView) {
+        
+    }
+    
     func sendMessage(_ message: String) {
         guard let sender = sender else { return }
+        if message == "" { return }
         FireStoreManager.shared.sendMessage(chatId!, sender: sender, message: message) { (msg) in
-            guard let msg = msg else { return }
-            print(msg)
-            self.messages.append(msg)
-            self.tableView.reloadData()
-            self.tableView.scrollToRow(at: IndexPath(row: self.messages.count - 1, section: 0), at: .bottom, animated: false)
+            self.sendMessageView.textView.resignFirstResponder()
+            self.sendMessageView.textView.text = ""
         }
     }
 }
@@ -142,12 +166,12 @@ class MessageTableViewCell: UITableViewCell {
     func setMessage(_ message: Message) {
         
         tv.text = message.content
-//        dateLb.text = message.send
+        //        dateLb.text = message.send
         
         guard let isMyMessage = message.isMyMessage else { return }
         
         if !isMyMessage {
-
+            
             tv.snp.remakeConstraints { (make) in
                 make.top.equalTo(10)
                 make.leading.equalTo(10)
@@ -187,6 +211,7 @@ class MessageTableViewCell: UITableViewCell {
 
 protocol SendMessageViewDelegate: class {
     func sendMessage(_ message: String)
+    func focusTextView(_ sender: UITextView)
 }
 
 class SendMessageView: UIView {
@@ -222,6 +247,10 @@ class SendMessageView: UIView {
             make.size.equalTo(30)
         }
         
+        textView.delegate = self
+        textView.isScrollEnabled = false
+        textView.sizeToFit()
+        
         sendBtn.backgroundColor = .red
         sendBtn.addTarget(self, action: #selector(sendMessage(_:)), for: .touchUpInside)
         
@@ -235,4 +264,10 @@ class SendMessageView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
+}
+
+extension SendMessageView: UITextViewDelegate {
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        delegate?.focusTextView(textView)
+    }
 }

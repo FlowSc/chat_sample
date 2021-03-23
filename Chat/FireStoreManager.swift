@@ -21,6 +21,8 @@ class FireStoreManager {
     static let shared = FireStoreManager()
     private let db = Firestore.firestore()
     
+    
+    
     private init() {}
     
     func requestSignIn(_ id: String, pw: String, completion: @escaping (User?) -> ()) {
@@ -28,7 +30,7 @@ class FireStoreManager {
         db.collection("users").whereField("email", isEqualTo: id).whereField("password", isEqualTo: pw).getDocuments { (snapshot, err) in
             
             guard let snapshot = snapshot else { return }
-                        
+            
             let fetched = snapshot.documents.map { doc -> User? in
                 
                 if var user = try? doc.data(as: User.self) {
@@ -39,7 +41,7 @@ class FireStoreManager {
                     return nil
                 }
             }
-                            
+            
             if let result = fetched.first {
                 completion(result)
             } else {
@@ -126,7 +128,7 @@ class FireStoreManager {
             }
         }
     }
-        
+    
     func makeChat(_ myId: String, receiverId: String, completion: @escaping (String)->()) {
         
         db.collection("chats").whereField("owners", isEqualTo: [myId, receiverId].sorted())
@@ -146,25 +148,24 @@ class FireStoreManager {
             }
     }
     
-
+    
     func sendMessage(_ chatId: String, sender: User, message: String, completion: @escaping (Message?)->()) {
         
         let ref = db.collection("chats/\(chatId)/thread")
-            
         
         ref.parent?.updateData(["lastMsg":message,
-                                "lastMsgDate":Timestamp.init(date: Date())])
+                                "lastMsgDate":Timestamp(date: Date())])
         
         let addDoc = ref.addDocument(data: ["sender":sender.nickname,
                                             "content": message,
                                             "senderId": sender.id!,
                                             "sendDate": Date()
-                        ])
+        ])
         
         let messageId = addDoc.documentID
         
         addDoc.getDocument { (doc, err) in
-                        
+            
             if var msg = try? doc?.data(as: Message.self) {
                 msg.id = messageId
                 msg.isMyMessage = true
@@ -207,7 +208,63 @@ class FireStoreManager {
                 completion(nil)
             }
         }
+    }
+    
+    func observeChat(_ chatId: String, userId: String, completion: @escaping ([Message])->()) {
         
+        db.collection("chats/\(chatId)/thread").addSnapshotListener { (snapshot, err) in
+            
+            if let messages = snapshot?.documentChanges.map({ change -> Message? in
+                
+                let doc = change.document.data()
+                
+                
+                
+                guard let name = doc["sender"] as? String,
+                      let content = doc["content"] as? String,
+                      let senderId = doc["senderId"] as? String,
+                      let sendDate = doc["sendDate"] as? Timestamp else { return nil}
+                
+                if change.type == .added {
+                    return Message(id: change.document.documentID, content: content, sender: name, senderId: senderId, sendDate: sendDate.dateValue(), isMyMessage: userId == senderId)
+                } else { return nil }
+                
+                
+            }).compactMap({ $0 }) {
+                completion(messages)
+            } else {
+                completion([])
+            }
+        }
+    }
+    
+    func observeChatList(_ userId: String, completion: @escaping (([ChatResult]) -> ())) {
+        
+        db.collection("chats").whereField("owners", arrayContains: userId).addSnapshotListener { (snapshjot, error) in
+            
+            print(snapshjot)
+            
+            if let chats = snapshjot?.documentChanges.map({ (change) -> ChatResult? in
+                let data = change.document.data()
+                
+                let id = change.document.documentID
+                let owners = data["owners"] as! [String]
+                let lastMsg = data["lastMsg"] as! String
+                let lastMsgDate = data["lastMsgDate"] as! Timestamp
+                
+                if let others = owners.filter({ $0 != userId}).first {
+                    return ChatResult(chatId: id, other: others, lastMsg: lastMsg, lastMsgDate: lastMsgDate.dateValue())
+                } else {
+                    return nil
+                }
+            }).compactMap({ $0 }) {
+                completion(chats)
+            } else {
+                completion([])
+            }
+            
+            
+        }
     }
     
 }

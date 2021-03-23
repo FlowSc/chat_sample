@@ -22,6 +22,7 @@ class SignInViewController: UIViewController {
         setDelegates()
         setAttributes()
  
+        autoLogin()
     }
     
     private func setUI() {
@@ -30,7 +31,7 @@ class SignInViewController: UIViewController {
         
         self.view.backgroundColor = .white
         
-        views.forEach { $0.setBorder(radius: 3, width: 1, color: .blue) }
+        views.forEach { $0.setBorder(radius: 3, width: 1, color: .white233) }
         
         view.addSubviews(views)
         
@@ -69,11 +70,28 @@ class SignInViewController: UIViewController {
         idTextField.autocapitalizationType = .none
         
         signInBtn.setTitle("로그인", for: .normal)
+        signInBtn.setTitleColor(.black, for: .normal)
         signUpBtn.setTitle("회원가입", for: .normal)
-        
+        signUpBtn.setTitleColor(.black, for: .normal)
+
         
         signInBtn.addTarget(self, action: #selector(requestSignIn), for: .touchUpInside)
         signUpBtn.addTarget(self, action: #selector(moveToSignUp), for: .touchUpInside)
+        
+    }
+    
+    func autoLogin() {
+        
+        if let record = UserDefaults.standard.data(forKey: "loginUser") {
+            
+            if let user = try? JSONDecoder().decode(User.self, from: record) {
+                let chatListVc = ChatListViewController()
+                chatListVc.setUser(user)
+                let nVc = UINavigationController(rootViewController: chatListVc)
+                nVc.modalPresentationStyle = .fullScreen
+                self.present(nVc, animated: true, completion: nil)
+            }
+        }
         
     }
     
@@ -100,6 +118,8 @@ class SignInViewController: UIViewController {
         pwTextField.delegate = self
     }
     
+    
+    
     @objc func requestSignIn(_ sender: UIButton) {
         
         guard let id = idTextField.text, let pw = pwTextField.text else { return }
@@ -108,6 +128,11 @@ class SignInViewController: UIViewController {
 
             if let result = result {
                 let chatListVc = ChatListViewController()
+                
+                if let user = try? JSONEncoder().encode(result) {
+                    UserDefaults.standard.set(user, forKey: "loginUser")
+                }
+                
                 chatListVc.setUser(result)
                 let nVc = UINavigationController(rootViewController: chatListVc)
                 nVc.modalPresentationStyle = .fullScreen
