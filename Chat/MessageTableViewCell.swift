@@ -17,8 +17,7 @@ final class MessageTableViewCell: UITableViewCell {
     private let minimumWidth = UIWindow().frame.size.width * 0.3
     private let maximumWidth = UIWindow().frame.size.width * 0.6
     
-    var dateFormatter: DateFormatter {
-        
+    private var dateFormatter: DateFormatter {
         
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"

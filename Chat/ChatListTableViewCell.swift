@@ -10,8 +10,7 @@ import UIKit
 
 final class ChatListTableViewCell: UITableViewCell {
     
-    var dateFormatter: DateFormatter {
-        
+    private var dateFormatter: DateFormatter {
         
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
