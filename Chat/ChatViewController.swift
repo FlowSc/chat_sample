@@ -62,7 +62,7 @@ class ChatViewController: UIViewController {
     }
     
     private func setUI() {
-        
+        self.view.backgroundColor = .white
         self.view.addSubviews([tableView, sendMessageView])
         
         sendMessageView.snp.makeConstraints { (make) in
@@ -80,10 +80,22 @@ class ChatViewController: UIViewController {
     }
     
     @objc func keyboardWillAppear(_ notification: NSNotification) {
+        
+        
                 
         if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
             if !isKeyboardOn {
-                self.view.frame.origin.y -= keyboardSize.height
+            
+                UIView.animate(withDuration: 0.3) {
+                    
+                    self.sendMessageView.snp.updateConstraints { (make) in
+                        make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom).offset(-keyboardSize.height + 34)
+                    }
+                    
+                    self.view.layoutIfNeeded()
+                
+                }
+       
                 isKeyboardOn = true
             }
         }
@@ -93,7 +105,14 @@ class ChatViewController: UIViewController {
         
         if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
             if isKeyboardOn {
-                self.view.frame.origin.y += keyboardSize.height
+                
+                UIView.animate(withDuration: 0.3) {
+                    self.sendMessageView.snp.updateConstraints { (make) in
+                        make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom)
+                    }
+                    self.view.layoutIfNeeded()
+
+                }
                 isKeyboardOn = false
             }
         }

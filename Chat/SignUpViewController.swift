@@ -93,7 +93,7 @@ class SignUpViewController: UIViewController {
             make.centerX.equalToSuperview()
         }
         
-        idTf.placeholder = "아이디를 입력해주세요"
+        idTf.placeholder = "이메일을 입력해주세요"
         pwTf.placeholder = "비밀번호를 입력해주세요"
         nickNameTf.placeholder = "닉네임을 입력해주세요"
         descTf.placeholder = "정보를 입력해주세요"
