@@ -46,6 +46,9 @@ class SendMessageView: UIView {
             make.size.equalTo(30)
         }
         
+        textView.keyboardType = .default
+        textView.autocorrectionType = .no
+        textView.autocapitalizationType = .none
         textView.delegate = self
         textView.isScrollEnabled = false
         textView.sizeToFit()

@@ -52,16 +52,16 @@ final class MessageTableViewCell: UITableViewCell {
     }
     
     func setAttributes() {
-        
         self.selectionStyle = .none
         tv.isEditable = false
-        tv.isSelectable = false
         tv.isScrollEnabled = false
+        tv.autocorrectionType = .no
+        tv.autocapitalizationType = .none
+        tv.dataDetectorTypes = .all
         tv.backgroundColor = .white233
         tv.setBorder(radius: 3, width: 1, color: .clear)
         profileImv.setBorder(radius: 5, width: 1, color: .clear)
         dateLb.font = UIFont.systemFont(ofSize: 11)
-        
     }
     
     func setMessage(_ message: Message, senderProfileImg: String) {

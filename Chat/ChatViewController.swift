@@ -128,8 +128,8 @@ extension ChatViewController: SendMessageViewDelegate {
         guard let sender = sender else { return }
         if message == "" { return }
         FireStoreManager.shared.sendMessage(chatId!, sender: sender, message: message) { (msg) in
-            self.sendMessageView.textView.resignFirstResponder()
             self.sendMessageView.textView.text = ""
+            self.sendMessageView.textView.resignFirstResponder()
         }
     }
 }
