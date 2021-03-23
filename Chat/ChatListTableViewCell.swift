@@ -59,6 +59,7 @@ final class ChatListTableViewCell: UITableViewCell {
         chatLb.snp.makeConstraints { (make) in
             make.top.equalTo(descLb.snp.bottom).offset(5)
             make.leading.equalTo(nameLb.snp.leading)
+            make.trailing.equalTo(unreadLb.snp.leading).offset(-10)
         }
         
         unreadLb.snp.makeConstraints { (make) in

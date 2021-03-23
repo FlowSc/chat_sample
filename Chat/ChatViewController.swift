@@ -109,9 +109,9 @@ extension ChatViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "MessageTableViewCell", for: indexPath) as? MessageTableViewCell else { return UITableViewCell() }
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "MessageTableViewCell", for: indexPath) as? MessageTableViewCell, let sender = sender else { return UITableViewCell() }
         
-        cell.setMessage(messages[indexPath.row])
+        cell.setMessage(messages[indexPath.row], senderProfileImg: sender.imageUrl)
         
         return cell
         

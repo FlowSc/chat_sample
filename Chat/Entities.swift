@@ -38,6 +38,7 @@ struct Message: Codable {
     let senderId: String
     let sendDate: Date
     var isMyMessage: Bool?
+    
 }
 
 

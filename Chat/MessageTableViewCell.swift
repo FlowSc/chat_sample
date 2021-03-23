@@ -10,11 +10,22 @@ import UIKit
 
 final class MessageTableViewCell: UITableViewCell {
     
+    private let profileImv = UIImageView()
     private let tv = UITextView()
     private let dateLb = UILabel()
     
-    private let cellWidth = UIWindow().frame.size.width * 0.45
+    private let minimumWidth = UIWindow().frame.size.width * 0.3
+    private let maximumWidth = UIWindow().frame.size.width * 0.6
     
+    var dateFormatter: DateFormatter {
+        
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        
+        return formatter
+        
+    }
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setUI()
@@ -23,12 +34,13 @@ final class MessageTableViewCell: UITableViewCell {
     
     private func setUI() {
         
-        self.contentView.addSubviews([tv, dateLb])
-                
+        self.contentView.addSubviews([profileImv, tv, dateLb])
+        
         tv.snp.makeConstraints { (make) in
             make.top.equalTo(10)
             make.leading.equalTo(10)
-            make.width.equalTo(cellWidth)
+            make.width.greaterThanOrEqualTo(minimumWidth)
+            make.width.lessThanOrEqualTo(maximumWidth)
             make.bottom.equalTo(-10)
         }
         
@@ -36,7 +48,7 @@ final class MessageTableViewCell: UITableViewCell {
             make.leading.equalTo(tv.snp.trailing).offset(5)
             make.bottom.equalTo(tv.snp.bottom)
         }
-
+        
     }
     
     func setAttributes() {
@@ -47,23 +59,37 @@ final class MessageTableViewCell: UITableViewCell {
         tv.isScrollEnabled = false
         tv.backgroundColor = .white233
         tv.setBorder(radius: 3, width: 1, color: .clear)
+        profileImv.setBorder(radius: 5, width: 1, color: .clear)
         dateLb.font = UIFont.systemFont(ofSize: 11)
         
     }
     
-    func setMessage(_ message: Message) {
+    func setMessage(_ message: Message, senderProfileImg: String) {
         
+        let date = dateFormatter.string(from: message.sendDate)
+
         tv.text = message.content
-        dateLb.text = "\(message.sendDate)"
+        dateLb.text = date
+        profileImv.setImageFrom(senderProfileImg)
         
         guard let isMyMessage = message.isMyMessage else { return }
         
         if !isMyMessage {
             
-            tv.snp.remakeConstraints { (make) in
+            profileImv.isHidden = false
+            
+            profileImv.snp.makeConstraints { (make) in
+                
                 make.top.equalTo(10)
                 make.leading.equalTo(10)
-                make.width.equalTo(cellWidth)
+                make.size.equalTo(30)
+                
+            }
+            
+            tv.snp.remakeConstraints { (make) in
+                make.top.equalTo(10)
+                make.leading.equalTo(profileImv.snp.trailing).offset(5)
+                make.trailing.lessThanOrEqualTo(-minimumWidth)
                 make.bottom.equalTo(-10)
             }
             
@@ -74,10 +100,12 @@ final class MessageTableViewCell: UITableViewCell {
             
         } else {
             
+            profileImv.isHidden = true
+            
             tv.snp.remakeConstraints { (make) in
                 make.top.equalTo(10)
                 make.trailing.equalTo(-10)
-                make.width.equalTo(cellWidth)
+                make.leading.greaterThanOrEqualTo(minimumWidth)
                 make.bottom.equalTo(-10)
             }
             
