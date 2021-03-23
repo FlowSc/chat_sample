@@ -84,12 +84,12 @@ class ChatViewController: UIViewController {
         
                 
         if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
-            if !isKeyboardOn {
+//            if !isKeyboardOn {
             
                 UIView.animate(withDuration: 0.3) {
                     
                     self.sendMessageView.snp.updateConstraints { (make) in
-                        make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom).offset(-keyboardSize.height + 34)
+                        make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom).offset(-keyboardSize.height + self.view.safeAreaBottom)
                     }
                     
                     self.view.layoutIfNeeded()
@@ -97,14 +97,13 @@ class ChatViewController: UIViewController {
                 }
        
                 isKeyboardOn = true
-            }
+//            }
         }
     }
     
     @objc func keyboardWillDisappear(_ notification: NSNotification) {
         
-        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
-            if isKeyboardOn {
+//            if isKeyboardOn {
                 
                 UIView.animate(withDuration: 0.3) {
                     self.sendMessageView.snp.updateConstraints { (make) in
@@ -113,9 +112,9 @@ class ChatViewController: UIViewController {
                     self.view.layoutIfNeeded()
 
                 }
-                isKeyboardOn = false
-            }
-        }
+//                isKeyboardOn = false
+//            }
+        
     }
     
 }
