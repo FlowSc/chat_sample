@@ -22,23 +22,5 @@ extension UIView {
         self.clipsToBounds = true
         
     }
-    
-    var safeAreaBottom: CGFloat {
-          if #available(iOS 11, *) {
-            if let window = UIApplication.shared.windows.first {
-                 return window.safeAreaInsets.bottom
-             }
-          }
-          return 0
-     }
-
-    var safeAreaTop: CGFloat {
-          if #available(iOS 11, *) {
-            if let window = UIApplication.shared.windows.first {
-                 return window.safeAreaInsets.top
-             }
-          }
-          return 0
-     }
 }
 

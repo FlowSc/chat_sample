@@ -18,6 +18,8 @@ class ChatViewController: UIViewController {
     
     private var isKeyboardOn: Bool = false
     
+    var keyboardHeight: CGFloat?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -79,41 +81,36 @@ class ChatViewController: UIViewController {
         
     }
     
-    @objc func keyboardWillAppear(_ notification: NSNotification) {
-        
-        
+    @objc func keyboardWillAppear(_ notification: NSNotification) {        
                 
-        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameBeginUserInfoKey] as? NSValue)?.cgRectValue {
-//            if !isKeyboardOn {
-            
+        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
+            if !isKeyboardOn {
+                            
+                keyboardHeight = keyboardSize.height - self.view.safeAreaInsets.bottom
+                                        
                 UIView.animate(withDuration: 0.3) {
-                    
-                    self.sendMessageView.snp.updateConstraints { (make) in
-                        make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom).offset(-keyboardSize.height + self.view.safeAreaBottom)
-                    }
-                    
+                    guard let height = self.keyboardHeight else { return }
+                    self.view.center.y -= height
                     self.view.layoutIfNeeded()
-                
                 }
        
                 isKeyboardOn = true
-//            }
+            }
         }
     }
     
     @objc func keyboardWillDisappear(_ notification: NSNotification) {
         
-//            if isKeyboardOn {
+            if isKeyboardOn {
                 
                 UIView.animate(withDuration: 0.3) {
-                    self.sendMessageView.snp.updateConstraints { (make) in
-                        make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom)
-                    }
+                    guard let height = self.keyboardHeight else { return }
+                    self.view.center.y += height
                     self.view.layoutIfNeeded()
 
                 }
-//                isKeyboardOn = false
-//            }
+                isKeyboardOn = false
+            }
         
     }
     
