@@ -10,19 +10,19 @@ import Firebase
 
 class SignUpViewController: UIViewController {
     
-    let idTf = DebounceTextField()
-    let idCheckLb = UILabel()
-    let pwTf = UITextField()
-    let nickNameTf = DebounceTextField()
-    let nickNameCheckLb = UILabel()
-    let descTf = UITextField()
-    let profileSelectBtn = UIButton()
-    let profileImv = UIImageView()
+    private let idTf = DebounceTextField()
+    private let idCheckLb = UILabel()
+    private let pwTf = UITextField()
+    private let nickNameTf = DebounceTextField()
+    private let nickNameCheckLb = UILabel()
+    private let descTf = UITextField()
+    private let profileSelectBtn = UIButton()
+    private let profileImv = UIImageView()
     
-    let signUpBtn = UIButton()
+    private let signUpBtn = UIButton()
     
-    var isValidEmail: Bool = false
-    var isValidNickName: Bool = false
+    private(set) var isValidEmail: Bool = false
+    private(set) var isValidNickName: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -161,7 +161,7 @@ class SignUpViewController: UIViewController {
 
             guard let id = idTf.text, let pw = pwTf.text, let nickname = nickNameTf.text else { return }
             
-            let newUser = User(email: id, password: pw, imageUrl: "", nickname: nickname, description: descTf.text ?? "", id: "")
+            let newUser = User(email: id, password: pw, imageUrl: "https://via.placeholder.com/150", nickname: nickname, description: descTf.text ?? "", id: "")
             
             FireStoreManager.shared.addUser(user: newUser) { (isSuccess) in
                 if isSuccess {
