@@ -28,11 +28,11 @@ class ChatViewController: UIViewController {
         setTableView()
         setKeyboardNotifications()
         addChattigObserver()
-      
+        
     }
     
     private func setTableView() {
-
+        
         tableView.delegate = self
         tableView.dataSource = self
         tableView.separatorStyle = .none
@@ -52,10 +52,10 @@ class ChatViewController: UIViewController {
         FireStoreManager.shared.updateMessageStatus(chatId, myId: userId) { (result) in
             print(result)
         }
-
+        
         
         FireStoreManager.shared.observeChat(chatId, userId: userId) { (msgs) in
-                        
+            
             self.messages += msgs.sorted(by: { (a, b) -> Bool in
                 a.sendDate.timeIntervalSince1970 < b.sendDate.timeIntervalSince1970
             })
@@ -101,36 +101,45 @@ class ChatViewController: UIViewController {
     }
     
     @objc func keyboardWillAppear(_ notification: NSNotification) {
-                
+        
         if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
             if !isKeyboardOn {
-                            
+                
                 keyboardHeight = keyboardSize.height - self.view.safeAreaInsets.bottom
                 
-                    UIView.animate(withDuration: 0.3) {
-                        guard let height = self.keyboardHeight else { return }
-                        self.view.center.y -= height
-                        self.view.layoutIfNeeded()
-                    }
+                UIView.animate(withDuration: 0.3) {
+                    guard let height = self.keyboardHeight else { return }
                     
-                    isKeyboardOn = true
-
+                    self.sendMessageView.snp.updateConstraints { (make) in
+                        make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom).offset(-height)
+                    }
+                    self.view.layoutIfNeeded()
+                }
+                
+                if messages.count > 0 {
+                    self.tableView.scrollToRow(at: IndexPath(row: self.messages.count - 1, section: 0), at: .bottom, animated: false)
+                }
+                
+                isKeyboardOn = true
+                
             }
         }
     }
     
     @objc func keyboardWillDisappear(_ notification: NSNotification) {
         
-            if isKeyboardOn {
-                
-                UIView.animate(withDuration: 0.3) {
-                    guard let height = self.keyboardHeight else { return }
-                    self.view.center.y += height
-                    self.view.layoutIfNeeded()
-
+        if isKeyboardOn {
+            
+            UIView.animate(withDuration: 0.3) {
+                //                    guard let height = self.keyboardHeight else { return }
+                self.sendMessageView.snp.updateConstraints { (make) in
+                    make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom)
                 }
-                isKeyboardOn = false
+                self.view.layoutIfNeeded()
+                
             }
+            isKeyboardOn = false
+        }
         
     }
     
@@ -160,7 +169,7 @@ extension ChatViewController: SendMessageViewDelegate {
         if message == "" { return }
         FireStoreManager.shared.sendMessage(chatId!, sender: sender, message: message) { (msg) in
             self.sendMessageView.messageView.text = ""
-//            self.sendMessageView.messageView.resignFirstResponder()
+            //            self.sendMessageView.messageView.resignFirstResponder()
         }
     }
 }
