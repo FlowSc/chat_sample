@@ -106,14 +106,15 @@ class ChatViewController: UIViewController {
             if !isKeyboardOn {
                             
                 keyboardHeight = keyboardSize.height - self.view.safeAreaInsets.bottom
-                                        
-                UIView.animate(withDuration: 0.3) {
-                    guard let height = self.keyboardHeight else { return }
-                    self.view.center.y -= height
-                    self.view.layoutIfNeeded()
-                }
-       
-                isKeyboardOn = true
+                
+                    UIView.animate(withDuration: 0.3) {
+                        guard let height = self.keyboardHeight else { return }
+                        self.view.center.y -= height
+                        self.view.layoutIfNeeded()
+                    }
+                    
+                    isKeyboardOn = true
+
             }
         }
     }
@@ -159,7 +160,7 @@ extension ChatViewController: SendMessageViewDelegate {
         if message == "" { return }
         FireStoreManager.shared.sendMessage(chatId!, sender: sender, message: message) { (msg) in
             self.sendMessageView.messageView.text = ""
-            self.sendMessageView.messageView.resignFirstResponder()
+//            self.sendMessageView.messageView.resignFirstResponder()
         }
     }
 }
