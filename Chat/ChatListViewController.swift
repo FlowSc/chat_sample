@@ -42,7 +42,7 @@ class ChatListViewController: UIViewController {
                     guard let user = user else { return }
                     let chatThumbnail = ChatThumbnail(id: chat.chatId,
                                                       lastDate: chat.lastMsgDate,
-                                                      unreadCount: "",
+                                                      unreadCount: chat.unreadCount,
                                                       sender: user.nickname,
                                                       senderImg: user.imageUrl,
                                                       senderDesc: user.description,

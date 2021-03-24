@@ -11,7 +11,7 @@ struct ChatThumbnail: Codable {
     
     let id: String
     let lastDate: Date
-    let unreadCount: String
+    let unreadCount: Int
     let sender: String
     let senderImg: String
     let senderDesc: String
@@ -47,4 +47,5 @@ struct ChatResult: Codable {
     let other: String
     let lastMsg: String
     let lastMsgDate: Date
+    let unreadCount: Int
 }

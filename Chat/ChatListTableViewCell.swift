@@ -103,11 +103,11 @@ final class ChatListTableViewCell: UITableViewCell {
         dateLb.font = UIFont.systemFont(ofSize: 11)
         dateLb.textAlignment = .right
         
-//        unreadLb.backgroundColor = .red
-//        unreadLb.font = UIFont.systemFont(ofSize: 11)
-//        unreadLb.textColor = .white
-//        unreadLb.textAlignment = .center
-//        unreadLb.setBorder(radius: 8, width: 1, color: .clear)
+        unreadLb.backgroundColor = .red
+        unreadLb.font = UIFont.systemFont(ofSize: 11)
+        unreadLb.textColor = .white
+        unreadLb.textAlignment = .center
+        unreadLb.setBorder(radius: 8, width: 1, color: .clear)
         
     }
     
@@ -125,8 +125,9 @@ final class ChatListTableViewCell: UITableViewCell {
             self.dateLb.text = dateFormatter.string(from: chat.lastDate)
         }
         
+        self.unreadLb.isHidden = chat.unreadCount == 0
         
-        self.unreadLb.text = chat.unreadCount
+        self.unreadLb.text = "\(chat.unreadCount)"
         self.imv.setImageFrom(chat.senderImg)
         self.nameLb.text = chat.sender
         self.descLb.text = chat.senderDesc

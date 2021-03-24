@@ -121,12 +121,17 @@ class FireStoreManager {
             if let chatList = snapshot?.documents.map({ doc -> ChatResult? in
                 
                 let id = doc.documentID
-                guard let owners = doc.data()["owners"] as? [String],
-                      let lastMsg = doc.data()["lastMsg"] as? String,
-                      let lastMsgDate = doc.data()["lastMsgDate"] as? Timestamp else { return nil }
+                let data = doc.data()
+                guard let owners = data["owners"] as? [String],
+                      let lastMsg = data["lastMsg"] as? String,
+                      let lastMsgDate = data["lastMsgDate"] as? Timestamp else { return nil }
+                
+                let unreadCount = data["unreadCount"] as? [String: Int]
+                
+                let myCount = unreadCount?[userId] ?? 0
                 
                 if let others = owners.filter({ $0 != userId}).first {
-                    return ChatResult(chatId: id, other: others, lastMsg: lastMsg, lastMsgDate: lastMsgDate.dateValue())
+                    return ChatResult(chatId: id, other: others, lastMsg: lastMsg, lastMsgDate: lastMsgDate.dateValue(), unreadCount: myCount)
                 } else {
                     return nil
                 }
@@ -157,13 +162,50 @@ class FireStoreManager {
             }
     }
     
+    func updateMessageStatus(_ chatId: String, myId: String, completion: @escaping (Bool) -> ()) {
+        
+        
+        let ref = db.collection("chats/\(chatId)/thread")
+        
+        ref.parent?.getDocument(completion: { (snapshot, err) in
+            
+            guard let data = snapshot?.data() else { return }
+            
+            let owners = data["owners"] as! [String]
+            
+            let other = owners.filter { $0 != myId }.first!
+            
+            let unreadCount = data["unreadCount"] as? [String: Int]
+            let otherCount = unreadCount?[other]
+                        
+            ref.parent?.updateData(["unreadCount":[myId:0, other:(otherCount)]])
+            
+            completion(true)
+            
+        })
+        
+    }
+    
     
     func sendMessage(_ chatId: String, sender: User, message: String, completion: @escaping (Message?)->()) {
         
         let ref = db.collection("chats/\(chatId)/thread")
         
-        ref.parent?.updateData(["lastMsg":message,
-                                "lastMsgDate":Timestamp(date: Date())])
+        ref.parent?.getDocument(completion: { (snapshot, err) in
+            
+            guard let data = snapshot?.data() else { return }
+            
+            let owners = data["owners"] as! [String]
+            
+            let unreadCount = data["unreadCount"] as? [String: Int]
+            let firstOwnerCount = unreadCount?[owners[0]] ?? 0
+            let secondOwnerCount = unreadCount?[owners[1]] ?? 0
+            
+            ref.parent?.updateData(["lastMsg":message,
+                                    "lastMsgDate":Timestamp(date: Date()),
+                                    "unreadCount":[owners[0]:(firstOwnerCount + 1), owners[1]:(secondOwnerCount + 1)]
+            ])
+        })
         
         let addDoc = ref.addDocument(data: ["sender":sender.nickname,
                                             "content": message,
@@ -247,29 +289,29 @@ class FireStoreManager {
         }
     }
     
-    func observeChatList(_ userId: String, completion: @escaping (([ChatResult]) -> ())) {
-        
-        db.collection("chats").whereField("owners", arrayContains: userId).addSnapshotListener { (snapshjot, error) in
-            
-            if let chats = snapshjot?.documentChanges.map({ (change) -> ChatResult? in
-                let data = change.document.data()
-                
-                let id = change.document.documentID
-                let owners = data["owners"] as! [String]
-                let lastMsg = data["lastMsg"] as! String
-                let lastMsgDate = data["lastMsgDate"] as! Timestamp
-                
-                if let others = owners.filter({ $0 != userId}).first {
-                    return ChatResult(chatId: id, other: others, lastMsg: lastMsg, lastMsgDate: lastMsgDate.dateValue())
-                } else {
-                    return nil
-                }
-            }).compactMap({ $0 }) {
-                completion(chats)
-            } else {
-                completion([])
-            }            
-        }
-    }
+//    func observeChatList(_ userId: String, completion: @escaping (([ChatResult]) -> ())) {
+//        
+//        db.collection("chats").whereField("owners", arrayContains: userId).addSnapshotListener { (snapshjot, error) in
+//            
+//            if let chats = snapshjot?.documentChanges.map({ (change) -> ChatResult? in
+//                let data = change.document.data()
+//                
+//                let id = change.document.documentID
+//                let owners = data["owners"] as! [String]
+//                let lastMsg = data["lastMsg"] as! String
+//                let lastMsgDate = data["lastMsgDate"] as! Timestamp
+//                
+//                if let others = owners.filter({ $0 != userId}).first {
+//                    return ChatResult(chatId: id, other: others, lastMsg: lastMsg, lastMsgDate: lastMsgDate.dateValue())
+//                } else {
+//                    return nil
+//                }
+//            }).compactMap({ $0 }) {
+//                completion(chats)
+//            } else {
+//                completion([])
+//            }            
+//        }
+//    }
     
 }

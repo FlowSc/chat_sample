@@ -46,7 +46,15 @@ class ChatViewController: UIViewController {
     }
     
     private func addChattigObserver() {
-        FireStoreManager.shared.observeChat(self.chatId!, userId: myInfo!.id!) { (msgs) in
+        
+        guard let chatId = self.chatId, let userId = myInfo?.id else { return }
+        
+        FireStoreManager.shared.updateMessageStatus(chatId, myId: userId) { (result) in
+            print(result)
+        }
+
+        
+        FireStoreManager.shared.observeChat(chatId, userId: userId) { (msgs) in
                         
             self.messages += msgs.sorted(by: { (a, b) -> Bool in
                 a.sendDate.timeIntervalSince1970 < b.sendDate.timeIntervalSince1970
