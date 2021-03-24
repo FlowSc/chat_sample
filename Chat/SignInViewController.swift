@@ -65,7 +65,7 @@ class SignInViewController: UIViewController {
             
         }
         
-        idTextField.placeholder = "아이디"
+        idTextField.placeholder = "이메일"
         pwTextField.placeholder = "비밀번호"
         idTextField.autocorrectionType = .no
         idTextField.autocapitalizationType = .none
@@ -81,7 +81,7 @@ class SignInViewController: UIViewController {
         
     }
     
-    func autoLogin() {
+    private func autoLogin() {
         
         if let record = UserDefaults.standard.data(forKey: "loginUser") {
             

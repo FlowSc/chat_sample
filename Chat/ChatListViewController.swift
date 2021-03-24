@@ -46,6 +46,11 @@ class ChatListViewController: UIViewController {
                                                       lastMsg: chat.lastMsg)
                     self.chatList.append(chatThumbnail)
                     if list.count == self.chatList.count {
+                        
+                        self.chatList.sort { (a, b) -> Bool in
+                            a.lastDate.timeIntervalSince1970 > b.lastDate.timeIntervalSince1970
+                        }
+                        
                         self.tableView.reloadData()
                     }
                 }

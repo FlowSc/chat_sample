@@ -51,7 +51,7 @@ final class MessageTableViewCell: UITableViewCell {
         
     }
     
-    func setAttributes() {
+    private func setAttributes() {
         self.selectionStyle = .none
         tv.isEditable = false
         tv.isScrollEnabled = false

@@ -12,9 +12,14 @@ protocol SendMessageViewDelegate: class {
     func sendMessage(_ message: String)
 }
 
-class SendMessageView: UIView {
+final class SendMessageView: UIView {
     
-    let textView = UITextView()
+    private let textView = UITextView()
+    
+    var messageView: UITextView {
+        return textView
+    }
+    
     private let sendBtn = UIButton()
     
     weak var delegate: SendMessageViewDelegate?
@@ -24,7 +29,7 @@ class SendMessageView: UIView {
         setUI()
     }
     
-    func setUI() {
+    private func setUI() {
         
         self.addSubviews([textView, sendBtn])
         self.backgroundColor = .white

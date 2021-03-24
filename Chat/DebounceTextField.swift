@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-class DebounceTextField: UITextField {
+final class DebounceTextField: UITextField {
 
     deinit {
         self.removeTarget(self, action: #selector(self.editingChanged), for: .editingChanged)

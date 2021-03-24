@@ -125,7 +125,7 @@ class SignUpViewController: UIViewController {
         
     }
     
-    func mappingFunctions() {
+    private func mappingFunctions() {
         
         idTf.debounce(delay: 0.3) { (str) in
             guard let str = str else { return }

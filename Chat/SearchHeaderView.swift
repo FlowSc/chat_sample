@@ -12,7 +12,7 @@ protocol SearchHeaderViewDelegate: class {
     func findKeywordChanged(_ text: String)
 }
 
-class SearchHeaderView: UIView {
+final class SearchHeaderView: UIView {
     
     private let titleLb = UILabel()
     let textField = DebounceTextField()

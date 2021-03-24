@@ -31,7 +31,7 @@ class ChatViewController: UIViewController {
       
     }
     
-    func setTableView() {
+    private func setTableView() {
 
         tableView.delegate = self
         tableView.dataSource = self
@@ -40,12 +40,12 @@ class ChatViewController: UIViewController {
         sendMessageView.delegate = self
     }
     
-    func setKeyboardNotifications() {
+    private func setKeyboardNotifications() {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillDisappear), name: UIResponder.keyboardWillHideNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillAppear), name: UIResponder.keyboardWillShowNotification, object: nil)
     }
     
-    func addChattigObserver() {
+    private func addChattigObserver() {
         FireStoreManager.shared.observeChat(self.chatId!, userId: myInfo!.id!) { (msgs) in
                         
             self.messages += msgs.sorted(by: { (a, b) -> Bool in
@@ -89,7 +89,7 @@ class ChatViewController: UIViewController {
     }
     
     @objc func keyboardDismiss() {
-        sendMessageView.textView.resignFirstResponder()
+        sendMessageView.messageView.resignFirstResponder()
     }
     
     @objc func keyboardWillAppear(_ notification: NSNotification) {
@@ -150,8 +150,8 @@ extension ChatViewController: SendMessageViewDelegate {
         guard let sender = myInfo else { return }
         if message == "" { return }
         FireStoreManager.shared.sendMessage(chatId!, sender: sender, message: message) { (msg) in
-            self.sendMessageView.textView.text = ""
-            self.sendMessageView.textView.resignFirstResponder()
+            self.sendMessageView.messageView.text = ""
+            self.sendMessageView.messageView.resignFirstResponder()
         }
     }
 }

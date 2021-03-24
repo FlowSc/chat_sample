@@ -10,7 +10,6 @@ import UIKit
 class NewChatViewController: UIViewController {
     
     private let tableView = UITableView(frame: .zero, style: .plain)
-    
     private let searchView = SearchHeaderView()
     
     var connectedUsers: [User] = []
@@ -21,14 +20,20 @@ class NewChatViewController: UIViewController {
         super.viewDidLoad()
 
         setUI()
-
-        searchView.delegate = self
+        setTableView()
+  
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        searchView.textField.resignFirstResponder()
+    }
+    
+    private func setTableView() {
         tableView.delegate = self
         tableView.dataSource = self
+        searchView.delegate = self
         tableView.register(NewChatTableViewCell.self, forCellReuseIdentifier: "NewChatTableViewCell")
-        
-        self.navigationController?.navigationBar.isTranslucent = false
-        
     }
     
     @objc func keyboardDismiss() {
@@ -40,18 +45,14 @@ class NewChatViewController: UIViewController {
     func setData(_ info: User?) {
         self.myInfo = info
     }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        searchView.textField.resignFirstResponder()
-    }
-    
+        
     private func setUI() {
         self.view.addSubview(tableView)
         
         tableView.snp.makeConstraints { (make) in
             make.edges.equalToSuperview()
         }
+        self.navigationController?.navigationBar.isTranslucent = false
     }
 }
 
