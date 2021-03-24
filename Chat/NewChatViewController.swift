@@ -101,6 +101,7 @@ extension NewChatViewController: UITableViewDelegate, UITableViewDataSource {
 extension NewChatViewController: SearchHeaderViewDelegate {
     func findKeywordChanged(_ text: String) {
         guard let myId = self.myInfo?.id else { return }
+        if text == "" { return }
         FireStoreManager.shared.findUser(text, myId: myId) { (res) in
             self.connectedUsers = res
             self.tableView.reloadData()
