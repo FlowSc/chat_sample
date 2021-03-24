@@ -31,9 +31,12 @@ class ChatListViewController: UIViewController {
     }
     
     func getChatList() {
+        
+        self.chatList = []
+        self.tableView.reloadData()
+        
         guard let myId = myInfo?.id else { return }
         FireStoreManager.shared.getChatList(myId) { (list) in
-            self.chatList = []
             list.forEach { (chat) in
                 FireStoreManager.shared.getUser(chat.other) { (user) in
                     guard let user = user else { return }
@@ -121,6 +124,8 @@ extension ChatListViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        
+        
                 
         let item = chatList[indexPath.row]
         
