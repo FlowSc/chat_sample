@@ -235,9 +235,7 @@ class FireStoreManager {
     func observeChatList(_ userId: String, completion: @escaping (([ChatResult]) -> ())) {
         
         db.collection("chats").whereField("owners", arrayContains: userId).addSnapshotListener { (snapshjot, error) in
-            
-            print(snapshjot)
-            
+                        
             if let chats = snapshjot?.documentChanges.map({ (change) -> ChatResult? in
                 let data = change.document.data()
                 
@@ -255,9 +253,7 @@ class FireStoreManager {
                 completion(chats)
             } else {
                 completion([])
-            }
-            
-            
+            }            
         }
     }
     

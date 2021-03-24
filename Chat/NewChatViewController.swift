@@ -75,8 +75,8 @@ extension NewChatViewController: UITableViewDelegate, UITableViewDataSource {
             print(str, "ID")
             
             let vc = ChatViewController()
-            guard let sender = self.myInfo else { return }
-            vc.setData(str, sender: sender)
+            guard let myInfo = self.myInfo else { return }
+            vc.setData(str, myInfo: myInfo, senderName: item.nickname, senderImg: item.imageUrl)
             self.navigationController?.pushViewController(vc, animated: true)
             
         }

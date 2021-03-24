@@ -14,7 +14,8 @@ class ChatViewController: UIViewController {
     
     private(set) var messages: [Message] = []
     private(set) var chatId: String?
-    private(set) var sender: User?
+    private(set) var myInfo: User?
+    private(set) var senderProfileImg: String?
     
     private var isKeyboardOn: Bool = false
     
@@ -31,6 +32,7 @@ class ChatViewController: UIViewController {
     }
     
     func setTableView() {
+
         tableView.delegate = self
         tableView.dataSource = self
         tableView.separatorStyle = .none
@@ -44,7 +46,7 @@ class ChatViewController: UIViewController {
     }
     
     func addChattigObserver() {
-        FireStoreManager.shared.observeChat(self.chatId!, userId: sender!.id!) { (msgs) in
+        FireStoreManager.shared.observeChat(self.chatId!, userId: myInfo!.id!) { (msgs) in
                         
             self.messages += msgs.sorted(by: { (a, b) -> Bool in
                 a.sendDate.timeIntervalSince1970 < b.sendDate.timeIntervalSince1970
@@ -56,9 +58,10 @@ class ChatViewController: UIViewController {
         }
     }
     
-    func setData(_ id: String, sender: User) {
+    func setData(_ id: String, myInfo: User, senderName: String, senderImg: String) {
         self.chatId = id
-        self.sender = sender
+        self.myInfo = myInfo
+        self.title = senderName
         self.tableView.reloadData()
         
     }
@@ -81,7 +84,7 @@ class ChatViewController: UIViewController {
         
     }
     
-    @objc func keyboardWillAppear(_ notification: NSNotification) {        
+    @objc func keyboardWillAppear(_ notification: NSNotification) {
                 
         if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
             if !isKeyboardOn {
@@ -124,9 +127,9 @@ extension ChatViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "MessageTableViewCell", for: indexPath) as? MessageTableViewCell, let sender = sender else { return UITableViewCell() }
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "MessageTableViewCell", for: indexPath) as? MessageTableViewCell else { return UITableViewCell() }
         
-        cell.setMessage(messages[indexPath.row], senderProfileImg: sender.imageUrl)
+        cell.setMessage(messages[indexPath.row], senderProfileImg: senderProfileImg ?? "")
         
         return cell
         
@@ -140,7 +143,7 @@ extension ChatViewController: SendMessageViewDelegate {
     }
     
     func sendMessage(_ message: String) {
-        guard let sender = sender else { return }
+        guard let sender = myInfo else { return }
         if message == "" { return }
         FireStoreManager.shared.sendMessage(chatId!, sender: sender, message: message) { (msg) in
             self.sendMessageView.textView.text = ""

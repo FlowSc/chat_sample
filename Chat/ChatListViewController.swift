@@ -120,8 +120,8 @@ extension ChatListViewController: UITableViewDelegate, UITableViewDataSource {
         let item = chatList[indexPath.row]
         
         let vc = ChatViewController()
-        guard let sender = self.myInfo else { return }
-        vc.setData(item.id, sender: sender)
+        guard let myInfo = self.myInfo else { return }
+        vc.setData(item.id, myInfo: myInfo, senderName: item.sender, senderImg: item.senderImg)
         self.navigationController?.pushViewController(vc, animated: true)
 
     }
