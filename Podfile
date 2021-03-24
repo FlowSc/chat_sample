@@ -12,7 +12,7 @@ target 'Chat' do
     pod 'Firebase/Auth'
     pod 'Firebase/Firestore' 
     pod 'FirebaseFirestoreSwift'
-
+    pod 'Toast-Swift'
 
   target 'ChatTests' do
     inherit! :search_paths

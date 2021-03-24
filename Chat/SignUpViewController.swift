@@ -7,6 +7,7 @@
 
 import UIKit
 import Firebase
+import Toast_Swift
 
 class SignUpViewController: UIViewController {
     
@@ -183,7 +184,7 @@ class SignUpViewController: UIViewController {
                         }
                     }
                 } else {
-                    print("FAIL")
+                    self.view.makeToast("회원가입에 실패하였습니다")
                 }
             }
             

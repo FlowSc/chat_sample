@@ -7,6 +7,7 @@
 
 import UIKit
 import SnapKit
+import Toast_Swift
 
 class SignInViewController: UIViewController {
         
@@ -124,6 +125,9 @@ class SignInViewController: UIViewController {
         
         guard let id = idTextField.text, let pw = pwTextField.text else { return }
         
+        idTextField.resignFirstResponder()
+        pwTextField.resignFirstResponder()
+        
         FireStoreManager.shared.requestSignIn(id, pw: pw) { (result) in
 
             if let result = result {
@@ -138,7 +142,7 @@ class SignInViewController: UIViewController {
                 nVc.modalPresentationStyle = .fullScreen
                 self.present(nVc, animated: true)
             } else {
-                print("NO RESULT")
+                self.view.makeToast("로그인에 실패하였습니다. 회원정보를 확인해주세요")
             }
         }
     }
