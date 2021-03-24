@@ -198,12 +198,15 @@ class FireStoreManager {
             let owners = data["owners"] as! [String]
             
             let unreadCount = data["unreadCount"] as? [String: Int]
-            let firstOwnerCount = unreadCount?[owners[0]] ?? 0
-            let secondOwnerCount = unreadCount?[owners[1]] ?? 0
+            
+            let other = owners.filter { $0 != sender.id!}.first!
+
+            let myCount = unreadCount?[sender.id!] ?? 0
+            let otherCount = unreadCount?[other] ?? 0
             
             ref.parent?.updateData(["lastMsg":message,
                                     "lastMsgDate":Timestamp(date: Date()),
-                                    "unreadCount":[owners[0]:(firstOwnerCount + 1), owners[1]:(secondOwnerCount + 1)]
+                                    "unreadCount":[sender.id!:myCount, other:(otherCount + 1)]
             ])
         })
         
