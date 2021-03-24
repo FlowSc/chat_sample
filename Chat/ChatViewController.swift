@@ -82,6 +82,14 @@ class ChatViewController: UIViewController {
             make.bottom.equalTo(sendMessageView.snp.top)
         }
         
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(keyboardDismiss))
+        
+        tableView.addGestureRecognizer(gesture)
+        
+    }
+    
+    @objc func keyboardDismiss() {
+        sendMessageView.textView.resignFirstResponder()
     }
     
     @objc func keyboardWillAppear(_ notification: NSNotification) {
@@ -137,10 +145,6 @@ extension ChatViewController: UITableViewDelegate, UITableViewDataSource {
 }
 
 extension ChatViewController: SendMessageViewDelegate {
-    
-    func focusTextView(_ sender: UITextView) {
-        
-    }
     
     func sendMessage(_ message: String) {
         guard let sender = myInfo else { return }

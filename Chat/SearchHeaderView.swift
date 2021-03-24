@@ -15,7 +15,7 @@ protocol SearchHeaderViewDelegate: class {
 class SearchHeaderView: UIView {
     
     private let titleLb = UILabel()
-    private let textField = DebounceTextField()
+    let textField = DebounceTextField()
     private let bottomLine = UIView()
     private let connectedLb = UILabel()
     

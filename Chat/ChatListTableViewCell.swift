@@ -11,12 +11,9 @@ import UIKit
 final class ChatListTableViewCell: UITableViewCell {
     
     private var dateFormatter: DateFormatter {
-        
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
-        
         return formatter
-        
     }
     
     private let imv = UIImageView()

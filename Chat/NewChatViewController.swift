@@ -29,11 +29,21 @@ class NewChatViewController: UIViewController {
         
         self.navigationController?.navigationBar.isTranslucent = false
         
+    }
+    
+    @objc func keyboardDismiss() {
         
+        searchView.textField.resignFirstResponder()
+
     }
     
     func setData(_ info: User?) {
         self.myInfo = info
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        searchView.textField.resignFirstResponder()
     }
     
     private func setUI() {
@@ -46,6 +56,10 @@ class NewChatViewController: UIViewController {
 }
 
 extension NewChatViewController: UITableViewDelegate, UITableViewDataSource {
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        searchView.textField.resignFirstResponder()
+    }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         return searchView
@@ -69,11 +83,11 @@ extension NewChatViewController: UITableViewDelegate, UITableViewDataSource {
         
         let item = connectedUsers[indexPath.item]
         
+        searchView.textField.resignFirstResponder()
+        
         guard let id = self.myInfo?.id, let receiverId = item.id else { return }
                 
         FireStoreManager.shared.makeChat(id, receiverId: receiverId) { str in
-            print(str, "ID")
-            
             let vc = ChatViewController()
             guard let myInfo = self.myInfo else { return }
             vc.setData(str, myInfo: myInfo, senderName: item.nickname, senderImg: item.imageUrl)

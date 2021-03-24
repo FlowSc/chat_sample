@@ -10,31 +10,25 @@ import Firebase
 
 class SignUpViewController: UIViewController {
     
-    let idTf = UITextField()
+    let idTf = DebounceTextField()
+    let idCheckLb = UILabel()
     let pwTf = UITextField()
-    let nickNameTf = UITextField()
+    let nickNameTf = DebounceTextField()
+    let nickNameCheckLb = UILabel()
     let descTf = UITextField()
     let profileSelectBtn = UIButton()
     let profileImv = UIImageView()
     
     let signUpBtn = UIButton()
     
-    var validEmail: String? {
-        return idTf.text
-    }
-    
-    var validPassword: String? {
-        return pwTf.text
-    }
-    
-    var validNickname: String? {
-        return nickNameTf.text
-    }
+    var isValidEmail: Bool = false
+    var isValidNickName: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setUI()
+        mappingFunctions()
 
     }
     
@@ -42,28 +36,34 @@ class SignUpViewController: UIViewController {
         
         self.view.backgroundColor = .white
         
-        self.view.addSubviews([idTf, pwTf, nickNameTf, descTf, profileImv, profileSelectBtn, signUpBtn])
+        self.view.addSubviews([idTf, idCheckLb, pwTf, nickNameTf, nickNameCheckLb, descTf, signUpBtn])
         
-        profileImv.snp.makeConstraints { (make) in
-            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(16)
-            make.centerX.equalToSuperview()
-            make.size.equalTo(50)
-        }
-        
-        profileSelectBtn.snp.makeConstraints { (make) in
-            make.center.equalTo(profileImv.snp.center)
-            make.size.equalTo(profileImv.snp.size)
-        }
-        
+//        profileImv.snp.makeConstraints { (make) in
+//            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(16)
+//            make.centerX.equalToSuperview()
+//            make.size.equalTo(50)
+//        }
+//
+//        profileSelectBtn.snp.makeConstraints { (make) in
+//            make.center.equalTo(profileImv.snp.center)
+//            make.size.equalTo(profileImv.snp.size)
+//        }
+//
         idTf.snp.makeConstraints { (make) in
-            make.top.equalTo(profileSelectBtn.snp.bottom).offset(20)
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(16)
             make.leading.equalTo(16)
             make.height.equalTo(40)
             make.centerX.equalToSuperview()
         }
         
-        pwTf.snp.makeConstraints { (make) in
+        idCheckLb.snp.makeConstraints { (make) in
             make.top.equalTo(idTf.snp.bottom).offset(10)
+            make.leading.equalTo(idTf.snp.leading)
+            make.height.equalTo(30)
+        }
+        
+        pwTf.snp.makeConstraints { (make) in
+            make.top.equalTo(idCheckLb.snp.bottom).offset(10)
             make.leading.equalTo(idTf.snp.leading)
             make.height.equalTo(40)
 
@@ -78,17 +78,22 @@ class SignUpViewController: UIViewController {
             make.centerX.equalToSuperview()
         }
         
-        descTf.snp.makeConstraints { (make) in
+        nickNameCheckLb.snp.makeConstraints { (make) in
             make.top.equalTo(nickNameTf.snp.bottom).offset(10)
+            make.leading.equalTo(idTf.snp.leading)
+            make.height.equalTo(30)
+        }
+        
+        descTf.snp.makeConstraints { (make) in
+            make.top.equalTo(nickNameCheckLb.snp.bottom).offset(10)
             make.leading.equalTo(idTf.snp.leading)
             make.height.equalTo(40)
             make.centerX.equalToSuperview()
         }
         
-        
         signUpBtn.snp.makeConstraints { (make) in
             make.top.equalTo(descTf.snp.bottom).offset(30)
-            make.leading.equalTo(idTf.snp.leading)
+            make.leading.equalTo(idTf.snp.leading).offset(30)
             make.height.equalTo(50)
             make.centerX.equalToSuperview()
         }
@@ -100,67 +105,90 @@ class SignUpViewController: UIViewController {
         
         pwTf.isSecureTextEntry = true
         signUpBtn.setTitle("회원가입", for: .normal)
+        signUpBtn.setBorder(radius: 3)
         signUpBtn.setTitleColor(.black, for: .normal)
         
         
         [idTf, pwTf, nickNameTf, descTf].forEach { $0.setBorder(radius: 3, width: 1, color: .white233)}
         
-        idTf.addTarget(self, action: #selector(checkId(_:)), for: .allEditingEvents)
         idTf.autocorrectionType = .no
         idTf.autocapitalizationType = .none
-        
-        pwTf.addTarget(self, action: #selector(checkPassword(_:)), for: .allEditingEvents)
-        
-        nickNameTf.delegate = self
         nickNameTf.autocorrectionType = .no
         nickNameTf.autocapitalizationType = .none
+        nickNameCheckLb.font = UIFont.systemFont(ofSize: 12)
+        idCheckLb.font = UIFont.systemFont(ofSize: 12)
+        nickNameCheckLb.textColor = .red
+        idCheckLb.textColor = .red
         
         signUpBtn.addTarget(self, action: #selector(requestSignUp), for: .touchUpInside)
         
     }
     
+    func mappingFunctions() {
+        
+        idTf.debounce(delay: 0.3) { (str) in
+            guard let str = str else { return }
+            if str == "" { return }
+            
+            if !str.contains("@") || !str.contains(".") {
+                self.idCheckLb.text = "이메일 형식이 잘못되었습니다"
+                self.isValidEmail = false
+                return
+            }
+            
+            FireStoreManager.shared.checkEmail(str) { (result) in
+                self.isValidEmail = result
+                self.idCheckLb.textColor = result ? UIColor.link : UIColor.red
+                self.idCheckLb.text = result ? "사용 가능한 이메일입니다" : "중복된 이메일입니다"
+            }
+        }
+        
+        nickNameTf.debounce(delay: 0.3) { (str) in
+            guard let str = str else { return }
+            if str == "" { return }
+            FireStoreManager.shared.checkNickname(str) { (result) in
+                self.isValidNickName = result
+                self.nickNameCheckLb.textColor = result ? UIColor.link : UIColor.red
+                self.nickNameCheckLb.text = result ? "사용 가능한 닉네임입니다" : "중복된 닉네임입니다"
+
+            }
+        }
+    }
+    
     @objc func requestSignUp(_ sender: UIButton) {
         
-        guard let id = validEmail, let pw = validPassword, let nickname = validNickname else { return }
-        
-       
-        
-        let newUser = User(email: id, password: pw, imageUrl: "", nickname: nickname, description: descTf.text ?? "", id: "")
-        
-        FireStoreManager.shared.addUser(user: newUser) { (isSuccess) in
-            if isSuccess {
-                
-                if let user = try? JSONEncoder().encode(newUser) {
-                    UserDefaults.standard.set(user, forKey: "loginUser")
+        if isValidEmail && isValidNickName {
+
+            guard let id = idTf.text, let pw = pwTf.text, let nickname = nickNameTf.text else { return }
+            
+            let newUser = User(email: id, password: pw, imageUrl: "", nickname: nickname, description: descTf.text ?? "", id: "")
+            
+            FireStoreManager.shared.addUser(user: newUser) { (isSuccess) in
+                if isSuccess {
+                                        
+                    FireStoreManager.shared.requestSignIn(id, pw: pw) { (result) in
+                        
+                        guard let result = result else { return }
+                        
+                        if let user = try? JSONEncoder().encode(result) {
+                            UserDefaults.standard.set(user, forKey: "loginUser")
+                        }
+                        
+                        let chatListVc = ChatListViewController()
+                        chatListVc.setUser(result)
+                        let nVc = UINavigationController(rootViewController: chatListVc)
+                        nVc.modalPresentationStyle = .fullScreen
+                        self.present(nVc, animated: true) {
+                            self.navigationController?.popToRootViewController(animated: false)
+                        }
+                    }
+                } else {
+                    print("FAIL")
                 }
-                
-                let chatListVc = ChatListViewController()
-                chatListVc.setUser(newUser)
-                let nVc = UINavigationController(rootViewController: chatListVc)
-                nVc.modalPresentationStyle = .fullScreen
-                self.present(nVc, animated: true) {
-                    self.navigationController?.popToRootViewController(animated: false)
-                }
-            } else {
-                print("FAIL")
             }
+            
         }
-    }
-    
-    @objc func checkId(_ sender: UITextField) {
-        if let text = sender.text {
-            if !text.contains("@") || !(text.contains(".")) {
-              print("IS NOT EMAIL")
-            }
-        }
-    }
-    
-    @objc func checkPassword(_ sender: UITextField) {
-        if let text = sender.text {
-            if text.count < 8 {
-                print("NOT ENOUGH")
-            }
-        }
+        
     }
 
 }

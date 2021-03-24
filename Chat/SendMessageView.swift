@@ -10,7 +10,6 @@ import UIKit
 
 protocol SendMessageViewDelegate: class {
     func sendMessage(_ message: String)
-    func focusTextView(_ sender: UITextView)
 }
 
 class SendMessageView: UIView {
@@ -43,17 +42,20 @@ class SendMessageView: UIView {
         sendBtn.snp.makeConstraints { (make) in
             make.trailing.equalTo(-10)
             make.bottom.equalTo(-5)
-            make.size.equalTo(30)
+            make.height.equalTo(30)
+            make.width.equalTo(50)
         }
         
         textView.keyboardType = .default
         textView.autocorrectionType = .no
         textView.autocapitalizationType = .none
-        textView.delegate = self
         textView.isScrollEnabled = false
         textView.sizeToFit()
         
-        sendBtn.backgroundColor = .red
+        sendBtn.backgroundColor = .white233
+        sendBtn.setTitle("전송", for: .normal)
+        sendBtn.setTitleColor(.link, for: .normal)
+        sendBtn.setBorder(radius: 3, width: 0, color: .clear)
         sendBtn.addTarget(self, action: #selector(sendMessage(_:)), for: .touchUpInside)
         
     }
@@ -67,10 +69,3 @@ class SendMessageView: UIView {
     }
     
 }
-
-extension SendMessageView: UITextViewDelegate {
-    func textViewDidBeginEditing(_ textView: UITextView) {
-        delegate?.focusTextView(textView)
-    }
-}
-

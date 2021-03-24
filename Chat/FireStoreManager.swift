@@ -66,38 +66,53 @@ class FireStoreManager {
         
     }
     
+    func checkEmail(_ email: String, completion: @escaping (Bool) ->()) {
+        
+        let userCollection = db.collection("users")
+        
+        userCollection.whereField("email", isEqualTo: email).getDocuments { (docs, err) in
+            if let docs = docs {
+                completion(docs.count == 0)
+            } else {
+                completion(true)
+            }
+        }
+    }
+    
+    func checkNickname(_ nickname: String, completion: @escaping(Bool) -> ()) {
+        
+        let userCollection = db.collection("users")
+        
+        userCollection.whereField("nickname", isEqualTo: nickname).getDocuments { (docs, err) in
+            if let docs = docs {
+                completion(docs.count == 0)
+            } else {
+                completion(true)
+            }
+        }
+        
+    }
+    
     func addUser(user: User, completion: @escaping (Bool)->()) {
         
         let userCollection = db.collection("users")
         
-        userCollection.whereField("email", isEqualTo: user.email)
-            .getDocuments { (query, err) in
-                
-                if let query = query {
-                    
-                    if query.count == 0 {
-                        userCollection.addDocument(data: [
-                            "email":user.email,
-                            "password":user.password,
-                            "nickname":user.nickname,
-                            "imageUrl":user.imageUrl,
-                            "description":user.description
-                        ]) { (err) in
-                            if let _ = err {
-                                completion(false)
-                            } else {
-                                completion(true)
-                            }
-                        }
-                    } else {
-                        completion(false)
-                    }
-                    
-                } else {
-                    completion(false)
-                }
+        userCollection.addDocument(data: [
+            "email":user.email,
+            "password":user.password,
+            "nickname":user.nickname,
+            "imageUrl":user.imageUrl,
+            "description":user.description
+        ]) { (err) in
+            if let _ = err {
+                completion(false)
+            } else {
+                completion(true)
             }
+        }
     }
+    
+    
     
     func getChatList(_ userId: String, completion: @escaping (([ChatResult]) -> ())) {
         
@@ -107,8 +122,8 @@ class FireStoreManager {
                 
                 let id = doc.documentID
                 guard let owners = doc.data()["owners"] as? [String],
-                let lastMsg = doc.data()["lastMsg"] as? String,
-                let lastMsgDate = doc.data()["lastMsgDate"] as? Timestamp else { return nil }
+                      let lastMsg = doc.data()["lastMsg"] as? String,
+                      let lastMsgDate = doc.data()["lastMsgDate"] as? Timestamp else { return nil }
                 
                 if let others = owners.filter({ $0 != userId}).first {
                     return ChatResult(chatId: id, other: others, lastMsg: lastMsg, lastMsgDate: lastMsgDate.dateValue())
@@ -235,7 +250,7 @@ class FireStoreManager {
     func observeChatList(_ userId: String, completion: @escaping (([ChatResult]) -> ())) {
         
         db.collection("chats").whereField("owners", arrayContains: userId).addSnapshotListener { (snapshjot, error) in
-                        
+            
             if let chats = snapshjot?.documentChanges.map({ (change) -> ChatResult? in
                 let data = change.document.data()
                 
